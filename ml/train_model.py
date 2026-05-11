@@ -37,7 +37,7 @@ def load_and_preprocess():
 
 
 def train_model(df):
-    """Train ML model"""
+    """Train and compare multiple ML models"""
     print("\nPreparing features...")
     
     # Features and target
@@ -61,41 +61,127 @@ def train_model(df):
     print(f"\nTraining set size: {len(X_train)}")
     print(f"Test set size: {len(X_test)}")
     
-    # Train model (using LinearRegression for interpretability; RandomForest for better accuracy)
-    print("\nTraining Linear Regression model...")
-    model = LinearRegression()
-    model.fit(X_train, y_train)
+    # Store results for comparison
+    models = {}
+    results = {}
     
-    # Evaluate
-    y_pred = model.predict(X_test)
-    mse = mean_squared_error(y_test, y_pred)
-    rmse = np.sqrt(mse)
-    mae = mean_absolute_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
+    # ===== LINEAR REGRESSION =====
+    print("\n" + "="*50)
+    print("Training Linear Regression model...")
+    print("="*50)
+    lr_model = LinearRegression()
+    lr_model.fit(X_train, y_train)
+    y_pred_lr = lr_model.predict(X_test)
     
-    print(f"\nModel Performance:")
-    print(f"  MSE:  {mse:.4f}")
-    print(f"  RMSE: {rmse:.4f}")
-    print(f"  MAE:  {mae:.4f}")
-    print(f"  R²:   {r2:.4f}")
+    lr_metrics = {
+        'mse': mean_squared_error(y_test, y_pred_lr),
+        'rmse': np.sqrt(mean_squared_error(y_test, y_pred_lr)),
+        'mae': mean_absolute_error(y_test, y_pred_lr),
+        'r2': r2_score(y_test, y_pred_lr)
+    }
     
-    # Feature importances (coefficients for linear model)
-    print(f"\nModel Coefficients:")
-    for feat, coef in zip(feature_cols, model.coef_):
+    print(f"\nLinear Regression Performance:")
+    print(f"  MSE:  {lr_metrics['mse']:.4f}")
+    print(f"  RMSE: {lr_metrics['rmse']:.4f}")
+    print(f"  MAE:  {lr_metrics['mae']:.4f}")
+    print(f"  R²:   {lr_metrics['r2']:.4f}")
+    
+    print(f"\nLinear Regression Coefficients:")
+    for feat, coef in zip(feature_cols, lr_model.coef_):
         print(f"  {feat}: {coef:.4f}")
-    print(f"  Intercept: {model.intercept_:.4f}")
+    print(f"  Intercept: {lr_model.intercept_:.4f}")
     
-    return model
+    models['linear_regression'] = lr_model
+    results['linear_regression'] = lr_metrics
+    
+    # ===== RANDOM FOREST =====
+    print("\n" + "="*50)
+    print("Training Random Forest model...")
+    print("="*50)
+    rf_model = RandomForestRegressor(
+        n_estimators=100,
+        max_depth=10,
+        min_samples_split=2,
+        random_state=42,
+        n_jobs=-1
+    )
+    rf_model.fit(X_train, y_train)
+    y_pred_rf = rf_model.predict(X_test)
+    
+    rf_metrics = {
+        'mse': mean_squared_error(y_test, y_pred_rf),
+        'rmse': np.sqrt(mean_squared_error(y_test, y_pred_rf)),
+        'mae': mean_absolute_error(y_test, y_pred_rf),
+        'r2': r2_score(y_test, y_pred_rf)
+    }
+    
+    print(f"\nRandom Forest Performance:")
+    print(f"  MSE:  {rf_metrics['mse']:.4f}")
+    print(f"  RMSE: {rf_metrics['rmse']:.4f}")
+    print(f"  MAE:  {rf_metrics['mae']:.4f}")
+    print(f"  R²:   {rf_metrics['r2']:.4f}")
+    
+    print(f"\nRandom Forest Feature Importances:")
+    for feat, imp in zip(feature_cols, rf_model.feature_importances_):
+        print(f"  {feat}: {imp:.4f}")
+    
+    models['random_forest'] = rf_model
+    results['random_forest'] = rf_metrics
+    
+    # ===== MODEL COMPARISON =====
+    print("\n" + "="*50)
+    print("MODEL COMPARISON")
+    print("="*50)
+    print(f"{'Metric':<15} {'Linear Reg':<15} {'Random Forest':<15} {'Winner'}")
+    print("-"*60)
+    
+    for metric in ['r2', 'mse', 'rmse', 'mae']:
+        lr_val = lr_metrics[metric]
+        rf_val = rf_metrics[metric]
+        # For R², higher is better; for others, lower is better
+        if metric == 'r2':
+            winner = 'RF' if rf_val > lr_val else 'LR'
+        else:
+            winner = 'RF' if rf_val < lr_val else 'LR'
+        print(f"{metric.upper():<15} {lr_val:<15.4f} {rf_val:<15.4f} {winner}")
+    
+    # Determine best model
+    best_model_name = 'random_forest' if results['random_forest']['r2'] > results['linear_regression']['r2'] else 'linear_regression'
+    best_model = models[best_model_name]
+    best_metrics = results[best_model_name]
+    
+    print(f"\n✓ Best Model: {best_model_name.replace('_', ' ').title()}")
+    print(f"  R² Score: {best_metrics['r2']:.4f}")
+    
+    # Store comparison data
+    comparison_data = {
+        'linear_regression': lr_metrics,
+        'random_forest': rf_metrics,
+        'best_model': best_model_name
+    }
+    
+    return best_model, comparison_data
 
 
 def main():
     df = load_and_preprocess()
-    model = train_model(df)
+    model, comparison = train_model(df)
     
     # Save model
     os.makedirs(os.path.dirname(MODEL_OUT), exist_ok=True)
     joblib.dump(model, MODEL_OUT)
     print(f"\n✓ Model saved to {MODEL_OUT}")
+    
+    # Save model comparison data for backend
+    import json
+    comparison_out = os.path.join(os.path.dirname(MODEL_OUT), "model_comparison.json")
+    with open(comparison_out, 'w') as f:
+        json.dump(comparison, f, indent=2)
+    print(f"✓ Model comparison saved to {comparison_out}")
+
+
+if __name__ == "__main__":
+    main()
 
 
 if __name__ == "__main__":

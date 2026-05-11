@@ -7,7 +7,7 @@ import Analytics from './pages/Analytics';
 import Predictions from './pages/Predictions';
 import Upload from './pages/Upload';
 
-const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = 'http://127.0.0.1:8001';
 
 function App() {
   const [data, setData] = useState([]);

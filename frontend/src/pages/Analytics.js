@@ -1,8 +1,26 @@
-import React, { useState } from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React, { useState, useEffect } from 'react';
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 function Analytics({ data, loading }) {
   const [selectedRegion, setSelectedRegion] = useState('All');
+  const [modelComparison, setModelComparison] = useState(null);
+  const [modelLoading, setModelLoading] = useState(true);
+
+  // Fetch model comparison data
+  useEffect(() => {
+    const fetchModelComparison = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8001/api/models/comparison');
+        const result = await response.json();
+        setModelComparison(result);
+      } catch (error) {
+        console.error('Error fetching model comparison:', error);
+      } finally {
+        setModelLoading(false);
+      }
+    };
+    fetchModelComparison();
+  }, []);
 
   if (loading) {
     return <div className="text-center py-12">Loading analytics...</div>;
@@ -89,6 +107,68 @@ function Analytics({ data, loading }) {
           </ResponsiveContainer>
         </div>
       </div>
+
+      {/* ML Model Comparison */}
+      {!modelLoading && modelComparison && (
+        <div className="mb-6 bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-bold mb-4">🤖 Machine Learning Model Comparison</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Linear Regression */}
+            <div className="border-l-4 border-blue-500 p-4">
+              <h3 className="text-lg font-semibold text-blue-600 mb-3">Linear Regression</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">R² Score:</span>
+                  <span className="font-semibold">{modelComparison.models.linear_regression.r2.toFixed(4)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">MSE:</span>
+                  <span className="font-semibold">{modelComparison.models.linear_regression.mse.toFixed(4)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">RMSE:</span>
+                  <span className="font-semibold">{modelComparison.models.linear_regression.rmse.toFixed(4)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">MAE:</span>
+                  <span className="font-semibold">{modelComparison.models.linear_regression.mae.toFixed(4)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Random Forest */}
+            <div className="border-l-4 border-green-500 p-4">
+              <h3 className="text-lg font-semibold text-green-600 mb-3">Random Forest</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">R² Score:</span>
+                  <span className="font-semibold">{modelComparison.models.random_forest.r2.toFixed(4)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">MSE:</span>
+                  <span className="font-semibold">{modelComparison.models.random_forest.mse.toFixed(4)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">RMSE:</span>
+                  <span className="font-semibold">{modelComparison.models.random_forest.rmse.toFixed(4)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">MAE:</span>
+                  <span className="font-semibold">{modelComparison.models.random_forest.mae.toFixed(4)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Best Model Badge */}
+          <div className="mt-4 p-3 bg-amber-50 border-l-4 border-amber-500 rounded">
+            <p className="text-amber-900">
+              <strong>✓ Best Model in Use:</strong> {modelComparison.best_model.replace('_', ' ').toUpperCase()}
+              <span className="ml-2 text-sm text-amber-700">(Higher R² = Better Predictions)</span>
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Region Statistics */}
       <div className="bg-white p-6 rounded-lg shadow">

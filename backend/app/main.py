@@ -6,6 +6,7 @@ import pandas as pd
 import joblib
 import os
 import csv
+import json
 from datetime import datetime
 
 from .database import SessionLocal, EnvironmentalData, get_db
@@ -30,6 +31,31 @@ SAMPLE_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "ml", "sa
 def health():
     """Health check endpoint"""
     return {"status": "ok", "version": "1.0.0"}
+
+
+@app.get("/api/models/comparison")
+def get_model_comparison():
+    """Get ML model comparison metrics (Linear Regression vs Random Forest)"""
+    try:
+        comparison_file = os.path.join(os.path.dirname(__file__), "..", "models", "model_comparison.json")
+        if os.path.exists(comparison_file):
+            with open(comparison_file, 'r') as f:
+                comparison = json.load(f)
+            return {
+                "models": comparison,
+                "best_model": comparison.get("best_model", "linear_regression")
+            }
+        else:
+            return {
+                "models": {
+                    "linear_regression": {"r2": 0, "mse": 0, "rmse": 0, "mae": 0},
+                    "random_forest": {"r2": 0, "mse": 0, "rmse": 0, "mae": 0}
+                },
+                "best_model": "linear_regression",
+                "warning": "Model comparison data not found; running training..."
+            }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/data")
