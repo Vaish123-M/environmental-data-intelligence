@@ -1,0 +1,8 @@
+venv/
+.venv/
+__pycache__/
+backend/models/*.joblib
+*.pyc
+env/
+node_modules/
+dist/
