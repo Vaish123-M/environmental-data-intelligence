@@ -6,3 +6,5 @@ backend/models/*.joblib
 env/
 node_modules/
 dist/
+build/
+frontend/build/

@@ -10,7 +10,7 @@ function Analytics({ data, loading }) {
   useEffect(() => {
     const fetchModelComparison = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8001/api/models/comparison');
+        const response = await fetch('http://127.0.0.1:8000/api/models/comparison');
         const result = await response.json();
         setModelComparison(result);
       } catch (error) {
@@ -167,6 +167,54 @@ function Analytics({ data, loading }) {
               <span className="ml-2 text-sm text-amber-700">(Higher R² = Better Predictions)</span>
             </p>
           </div>
+
+          {/* Model Comparison Plots */}
+          {modelComparison.plots && (
+            <div className="mt-6 pt-6 border-t-2 border-gray-200">
+              <h3 className="text-lg font-bold mb-4 text-gray-800">📊 Visual Comparison</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Metrics Comparison */}
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold mb-3 text-gray-700">Metrics Comparison</h4>
+                  <img 
+                    src={modelComparison.plots.metrics_comparison} 
+                    alt="Metrics Comparison" 
+                    className="w-full rounded border border-gray-300"
+                  />
+                </div>
+
+                {/* Predictions vs Actual */}
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold mb-3 text-gray-700">Predictions vs Actual</h4>
+                  <img 
+                    src={modelComparison.plots.predictions_vs_actual} 
+                    alt="Predictions vs Actual" 
+                    className="w-full rounded border border-gray-300"
+                  />
+                </div>
+
+                {/* Residuals */}
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold mb-3 text-gray-700">Residuals Analysis</h4>
+                  <img 
+                    src={modelComparison.plots.residuals} 
+                    alt="Residuals" 
+                    className="w-full rounded border border-gray-300"
+                  />
+                </div>
+
+                {/* Feature Importance */}
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold mb-3 text-gray-700">Feature Importance</h4>
+                  <img 
+                    src={modelComparison.plots.feature_importance} 
+                    alt="Feature Importance" 
+                    className="w-full rounded border border-gray-300"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

@@ -15,6 +15,9 @@ function Navbar() {
           <Link to="/analytics" className="hover:text-blue-200 transition font-medium">
             Analytics
           </Link>
+          <Link to="/evaluation" className="hover:text-blue-200 transition font-medium">
+            Evaluation
+          </Link>
           <Link to="/predictions" className="hover:text-blue-200 transition font-medium">
             Predictions
           </Link>

@@ -4,10 +4,11 @@ import axios from 'axios';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
+import Evaluation from './pages/Evaluation';
 import Predictions from './pages/Predictions';
 import Upload from './pages/Upload';
 
-const API_BASE = 'http://127.0.0.1:8001';
+const API_BASE = 'http://127.0.0.1:8000';
 
 function App() {
   const [data, setData] = useState([]);
@@ -43,8 +44,9 @@ function App() {
             </div>
           )}
           <Routes>
-            <Route path="/" element={<Dashboard data={data} loading={loading} />} />
+            <Route path="/" element={<Dashboard data={data} loading={loading} onRefresh={fetchData} />} />
             <Route path="/analytics" element={<Analytics data={data} loading={loading} />} />
+            <Route path="/evaluation" element={<Evaluation />} />
             <Route path="/predictions" element={<Predictions />} />
             <Route path="/upload" element={<Upload onUpload={fetchData} />} />
           </Routes>

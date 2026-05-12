@@ -81,7 +81,16 @@ Suggested Next Steps / Improvements:
 
 Sample Dataset & Attribution
 
-The included sample data is synthetic and small to illustrate the pipeline. Replace with public datasets (OpenAQ, NOAA, NASA) for real projects.
+The default training/data file is a real merged dataset built from two public sources:
+- **OpenAQ public S3 archive** for pollution observations (`openaq-data-archive`)
+- **Open-Meteo archive API** for matched daily weather (`temperature`, `humidity`, `rainfall`)
+
+The build script at `ml/build_real_dataset.py` downloads archive slices, combines them into the app schema, and writes `ml/sample_data/air_quality_real.csv`. AQI is derived from PM2.5 using the US EPA breakpoint formula.
+
+Step 4 deliverables:
+- Automated backend tests live in `backend/tests/`
+- Evaluation dashboard is available at `/evaluation` in the React app
+- The deployment guide includes the exact test and verification commands
 
 Contact / License
 

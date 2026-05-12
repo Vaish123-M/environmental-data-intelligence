@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const API_BASE = 'http://127.0.0.1:8001';
+const API_BASE = 'http://127.0.0.1:8000';
 
 function Predictions() {
   const [formData, setFormData] = useState({
@@ -143,6 +143,12 @@ function Predictions() {
                   <strong>Note:</strong> This prediction is based on a linear regression model trained on the sample dataset. For production use, integrate with a more sophisticated ML model.
                 </p>
               </div>
+
+              {prediction.model_version && (
+                <div className="mt-3 text-sm text-gray-500">
+                  Model version: {prediction.model_version}
+                </div>
+              )}
             </div>
           ) : (
             <div className="p-8 bg-gray-100 rounded-lg text-center text-gray-600">

@@ -36,6 +36,7 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 Backend will be available at `http://127.0.0.1:8000`
 API docs available at `http://127.0.0.1:8000/docs`
+Evaluation summary available at `http://127.0.0.1:8000/api/evaluation/summary`
 
 ### Frontend Setup
 
@@ -51,6 +52,7 @@ npm start
 ```
 
 Frontend will open at `http://localhost:3000`
+Evaluation dashboard available at `http://localhost:3000/evaluation`
 
 3. Build for production:
 ```bash
@@ -72,6 +74,11 @@ npm run build
 ### Data Management
 - `POST /api/upload` - Upload CSV file
 - `DELETE /api/data` - Clear all data
+
+### Model Evaluation
+- `GET /api/models/metadata` - Model version, features, preprocessing status
+- `GET /api/models/comparison` - Model comparison metrics and plot URLs
+- `GET /api/evaluation/summary` - Combined deployment and evaluation summary
 
 ## Database
 
@@ -200,6 +207,11 @@ environmental-data-intelligence/
 - Ensure backend is running on `http://127.0.0.1:8000`
 - Check CORS is enabled (should be by default)
 - Open browser developer console for error details
+
+**Evaluation dashboard issues:**
+- Verify `backend/models/model.joblib`, `model_metadata.json`, and `model_comparison.json` exist
+- Regenerate artifacts with `python ml/train_with_plots.py`
+- Confirm plot URLs return 200 under `/api/plots/`
 
 **Database issues:**
 - Delete `environmental_data.db` and restart backend to reset

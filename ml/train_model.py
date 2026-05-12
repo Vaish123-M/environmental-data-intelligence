@@ -5,6 +5,7 @@ Run: python ml/train_model.py
 """
 import pandas as pd
 import numpy as np
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
@@ -14,7 +15,7 @@ import joblib
 import os
 
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "sample_data", "air_quality_sample.csv")
+DATA_PATH = os.path.join(os.path.dirname(__file__), "sample_data", "air_quality_real.csv")
 MODEL_OUT = os.path.join(os.path.dirname(__file__), "..", "backend", "models", "model.joblib")
 
 
@@ -49,13 +50,9 @@ def train_model(df):
     print(f"Target variable: AQI")
     print(f"Samples: {len(X)}")
     
-    # Standardize features
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-    
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(
-        X_scaled, y, test_size=0.2, random_state=42
+        X, y, test_size=0.2, random_state=42
     )
     
     print(f"\nTraining set size: {len(X_train)}")
@@ -69,7 +66,10 @@ def train_model(df):
     print("\n" + "="*50)
     print("Training Linear Regression model...")
     print("="*50)
-    lr_model = LinearRegression()
+    lr_model = Pipeline([
+        ('scaler', StandardScaler()),
+        ('regressor', LinearRegression()),
+    ])
     lr_model.fit(X_train, y_train)
     y_pred_lr = lr_model.predict(X_test)
     
@@ -87,9 +87,10 @@ def train_model(df):
     print(f"  R²:   {lr_metrics['r2']:.4f}")
     
     print(f"\nLinear Regression Coefficients:")
-    for feat, coef in zip(feature_cols, lr_model.coef_):
+    linear_regressor = lr_model.named_steps['regressor']
+    for feat, coef in zip(feature_cols, linear_regressor.coef_):
         print(f"  {feat}: {coef:.4f}")
-    print(f"  Intercept: {lr_model.intercept_:.4f}")
+    print(f"  Intercept: {linear_regressor.intercept_:.4f}")
     
     models['linear_regression'] = lr_model
     results['linear_regression'] = lr_metrics
@@ -150,8 +151,8 @@ def train_model(df):
     best_model = models[best_model_name]
     best_metrics = results[best_model_name]
     
-    print(f"\n✓ Best Model: {best_model_name.replace('_', ' ').title()}")
-    print(f"  R² Score: {best_metrics['r2']:.4f}")
+    print(f"\n[BEST] Best Model: {best_model_name.replace('_', ' ').title()}")
+    print(f"  R2 Score: {best_metrics['r2']:.4f}")
     
     # Store comparison data
     comparison_data = {
@@ -170,14 +171,14 @@ def main():
     # Save model
     os.makedirs(os.path.dirname(MODEL_OUT), exist_ok=True)
     joblib.dump(model, MODEL_OUT)
-    print(f"\n✓ Model saved to {MODEL_OUT}")
+    print(f"\n[OK] Model saved to {MODEL_OUT}")
     
     # Save model comparison data for backend
     import json
     comparison_out = os.path.join(os.path.dirname(MODEL_OUT), "model_comparison.json")
     with open(comparison_out, 'w') as f:
         json.dump(comparison, f, indent=2)
-    print(f"✓ Model comparison saved to {comparison_out}")
+    print(f"[OK] Model comparison saved to {comparison_out}")
 
 
 if __name__ == "__main__":

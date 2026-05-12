@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, File, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from io import BytesIO, StringIO
 import pandas as pd
@@ -7,10 +8,14 @@ import joblib
 import os
 import csv
 import json
+import logging
 from datetime import datetime
 
 from .database import SessionLocal, EnvironmentalData, get_db
 from .schemas import EnvironmentalDataSchema, PredictRequest, PredictResponse
+from .model import EnvironmentalModel
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Environmental Data Intelligence API", version="1.0.0")
 
@@ -24,7 +29,33 @@ app.add_middleware(
 )
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "model.joblib")
-SAMPLE_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "ml", "sample_data", "air_quality_sample.csv")
+SAMPLE_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "ml", "sample_data", "air_quality_real.csv")
+PLOTS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "ml", "plots")
+
+# Mount plots directory for serving model comparison visualizations
+if os.path.exists(PLOTS_PATH):
+    app.mount("/api/plots", StaticFiles(directory=PLOTS_PATH), name="plots")
+
+# Global model variable and loader function
+model = None
+
+def get_model():
+    """Lazy-load model on first access."""
+    global model
+    if model is None:
+        try:
+            model_path = os.path.abspath(MODEL_PATH)
+            logger.info(f"[LOAD] Trying model path: {model_path}")
+            logger.info(f"[LOAD] Path exists: {os.path.exists(model_path)}")
+            if os.path.exists(model_path):
+                model = EnvironmentalModel.load(model_path)
+                logger.info(f"[LOAD] Model v{model.version} loaded")
+            else:
+                logger.warning(f"[LOAD] Model not found at {model_path}")
+        except Exception as e:
+            logger.error(f"[LOAD] Error: {type(e).__name__}: {str(e)}")
+            model = None
+    return model
 
 
 @app.get("/api/health")
@@ -35,15 +66,23 @@ def health():
 
 @app.get("/api/models/comparison")
 def get_model_comparison():
-    """Get ML model comparison metrics (Linear Regression vs Random Forest)"""
+    """Get ML model comparison metrics (Linear Regression vs Random Forest) with plot URLs"""
     try:
         comparison_file = os.path.join(os.path.dirname(__file__), "..", "models", "model_comparison.json")
+        plots = {
+            "metrics_comparison": "/api/plots/01_metrics_comparison.png",
+            "predictions_vs_actual": "/api/plots/02_predictions_vs_actual.png",
+            "residuals": "/api/plots/03_residuals.png",
+            "feature_importance": "/api/plots/04_feature_importance.png",
+        }
+        
         if os.path.exists(comparison_file):
             with open(comparison_file, 'r') as f:
                 comparison = json.load(f)
             return {
                 "models": comparison,
-                "best_model": comparison.get("best_model", "linear_regression")
+                "best_model": comparison.get("best_model", "linear_regression"),
+                "plots": plots
             }
         else:
             return {
@@ -52,8 +91,63 @@ def get_model_comparison():
                     "random_forest": {"r2": 0, "mse": 0, "rmse": 0, "mae": 0}
                 },
                 "best_model": "linear_regression",
+                "plots": plots,
                 "warning": "Model comparison data not found; running training..."
             }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/models/metadata")
+def get_model_metadata():
+    """Get model versioning, preprocessing, and metadata information"""
+    try:
+        m = get_model()
+        
+        if m is not None and isinstance(m, EnvironmentalModel):
+            metadata = m.get_metadata()
+            checks = m.validate_preprocessing()
+            return {
+                "model_info": metadata,
+                "preprocessing_validation": checks,
+                "status": "ok"
+            }
+        else:
+            return {
+                "status": "model_not_loaded",
+                "warning": "Could not load model for metadata"
+            }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/evaluation/summary")
+def get_evaluation_summary():
+    """Return a compact evaluation summary for the dashboard."""
+    try:
+        comparison_file = os.path.join(os.path.dirname(__file__), "..", "models", "model_comparison.json")
+        metadata_file = os.path.join(os.path.dirname(__file__), "..", "models", "model_metadata.json")
+        model_info = {}
+        if os.path.exists(metadata_file):
+            with open(metadata_file, "r") as f:
+                model_info = json.load(f)
+
+        comparison = {}
+        if os.path.exists(comparison_file):
+            with open(comparison_file, "r") as f:
+                comparison = json.load(f)
+
+        return {
+            "status": "ok",
+            "model_info": model_info,
+            "comparison": comparison,
+            "plots": {
+                "metrics_comparison": "/api/plots/01_metrics_comparison.png",
+                "predictions_vs_actual": "/api/plots/02_predictions_vs_actual.png",
+                "residuals": "/api/plots/03_residuals.png",
+                "feature_importance": "/api/plots/04_feature_importance.png",
+            },
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -145,22 +239,27 @@ def get_regions(db: Session = Depends(get_db)):
 
 @app.post("/api/predict", response_model=PredictResponse)
 def predict(req: PredictRequest):
-    """Predict AQI based on environmental factors"""
+    """Predict AQI based on environmental factors using wrapped model with versioning"""
     try:
-        model_file = os.path.abspath(MODEL_PATH)
-        if os.path.exists(model_file):
-            model = joblib.load(model_file)
-            X = [[req.temperature, req.humidity, req.rainfall]]
-            pred = model.predict(X)[0]
-            return PredictResponse(predicted_aqi=float(pred))
+        m = get_model()
         
-        # Fallback heuristic
+        # Use wrapped model for prediction (includes preprocessing)
+        if m is not None and isinstance(m, EnvironmentalModel):
+            result = m.predict(req.temperature, req.humidity, req.rainfall)
+            return PredictResponse(
+                predicted_aqi=result["predicted_aqi"],
+                model_version=result.get("model_version", "1.0.0"),
+            )
+        
+        # Fallback heuristic if model unavailable
+        logger.warning("Using fallback heuristic prediction")
         pred = 0.5 * req.temperature + 0.3 * req.humidity + 0.2 * (100 - req.rainfall)
         return PredictResponse(
             predicted_aqi=float(pred),
             warning="Model not found; using heuristic estimate."
         )
     except Exception as e:
+        logger.error(f"Prediction failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

@@ -1,7 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-function Dashboard({ data, loading }) {
+const API_BASE = 'http://127.0.0.1:8000';
+
+function Dashboard({ data, loading, onRefresh }) {
+  const [working, setWorking] = useState(false);
+  const [message, setMessage] = useState(null);
+
+  const handleClearData = async () => {
+    if (!window.confirm('Delete all raw data? This cannot be undone.')) return;
+    try {
+      setWorking(true);
+      await axios.delete(`${API_BASE}/api/data`);
+      setMessage({ type: 'success', text: 'All data deleted.' });
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Failed to delete data: ' + (err.response?.data?.detail || err.message) });
+    } finally {
+      setWorking(false);
+    }
+  };
   if (loading) {
     return <div className="text-center py-12 text-lg text-gray-600">Loading dashboard...</div>;
   }
@@ -98,7 +117,23 @@ function Dashboard({ data, loading }) {
 
       {/* Data Table */}
       <div className="bg-white p-6 rounded-lg shadow mt-6">
-        <h2 className="text-xl font-bold mb-4">Raw Data</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">Raw Data</h2>
+          <div>
+            <button
+              onClick={handleClearData}
+              disabled={working}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded"
+            >
+              {working ? 'Working...' : 'Delete All Data'}
+            </button>
+          </div>
+        </div>
+        {message && (
+          <div className={`mb-4 p-3 rounded ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+            {message.text}
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-100">

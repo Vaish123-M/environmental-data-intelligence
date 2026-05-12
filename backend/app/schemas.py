@@ -22,4 +22,5 @@ class PredictRequest(BaseModel):
 
 class PredictResponse(BaseModel):
     predicted_aqi: float
+    model_version: Optional[str] = None
     warning: Optional[str] = None
