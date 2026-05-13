@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-05-13T04:20:40.154069",
+  "model_path": "c:\\Users\\Lenovo\\Downloads\\environmental-data-intelligence\\ml\\..\\backend\\models\\model.joblib",
+  "num_samples": 20,
+  "latency": {
+    "single_prediction_ms": {
+      "mean": 1.2702906998893013,
+      "median": 1.0934500023722649,
+      "std": 0.9334020235002191,
+      "min": 1.0335999977542087,
+      "max": 25.856199994450435
+    },
+    "batch_1": {
+      "total_ms": 1.1804999958258122,
+      "per_sample_ms": 1.1804999958258122
+    },
+    "batch_10": {
+      "total_ms": 1.071199993020855,
+      "per_sample_ms": 0.10711999930208549
+    }
+  },
+  "size": {
+    "file_size_mb": 0.044043540954589844,
+    "memory_mb": 4.57763671875e-05
+  },
+  "throughput": {
+    "throughput_pred_per_sec": 793.2
+  }
+}

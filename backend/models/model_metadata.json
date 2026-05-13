@@ -1,19 +1,23 @@
 {
   "version": "1.0.0",
-  "created_at": "2026-05-12T02:25:05.747656",
-  "model_type": "Pipeline",
+  "created_at": "2026-05-13T04:07:19.027370",
+  "metrics": {
+    "mse": 229.02800609806923,
+    "rmse": 15.133671269657908,
+    "mae": 14.171963528138505,
+    "r2": -21.134993038774336
+  },
+  "params": {
+    "regressor__n_estimators": 50,
+    "regressor__min_samples_split": 2,
+    "regressor__min_samples_leaf": 2,
+    "regressor__max_depth": 5
+  },
   "features": [
     "temperature",
     "humidity",
     "rainfall",
     "temp_humidity_interaction",
     "temp_rainfall_interaction"
-  ],
-  "metrics": {
-    "mse": 76.17372791278387,
-    "rmse": 8.727756178582435,
-    "mae": 7.990342312235164,
-    "r2": -6.362003301748938
-  },
-  "has_scaler": true
+  ]
 }

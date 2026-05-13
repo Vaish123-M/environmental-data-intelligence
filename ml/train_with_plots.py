@@ -20,21 +20,25 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
-import joblib
 
 # Add backend to path for model wrapper import
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
-from app.model import EnvironmentalModel, create_model_from_pipeline
+from app.model import create_model_from_pipeline
 
 try:
     import matplotlib.pyplot as plt
+
     MATPLOTLIB_AVAILABLE = True
 except ImportError:
     MATPLOTLIB_AVAILABLE = False
     print("Note: matplotlib not installed; skipping plots")
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "sample_data", "air_quality_real.csv")
-MODEL_OUT = os.path.join(os.path.dirname(__file__), "..", "backend", "models", "model.joblib")
+DATA_PATH = os.path.join(
+    os.path.dirname(__file__), "sample_data", "air_quality_real.csv"
+)
+MODEL_OUT = os.path.join(
+    os.path.dirname(__file__), "..", "backend", "models", "model.joblib"
+)
 PLOTS_DIR = os.path.join(os.path.dirname(__file__), "plots")
 
 
@@ -66,10 +70,12 @@ def train_model(df):
     y = df["aqi"]
 
     print(f"Features: {feature_cols}")
-    print(f"Target variable: AQI")
+    print("Target variable: AQI")
     print(f"Samples: {len(X)}")
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
     print(f"\nTraining set size: {len(X_train)}")
     print(f"Test set size: {len(X_test)}")
@@ -82,7 +88,9 @@ def train_model(df):
     print("\n" + "=" * 50)
     print("Training Linear Regression model...")
     print("=" * 50)
-    lr_model = Pipeline([("scaler", StandardScaler()), ("regressor", LinearRegression())])
+    lr_model = Pipeline(
+        [("scaler", StandardScaler()), ("regressor", LinearRegression())]
+    )
     lr_model.fit(X_train, y_train)
     y_pred_lr = lr_model.predict(X_test)
 
@@ -93,7 +101,7 @@ def train_model(df):
         "r2": r2_score(y_test, y_pred_lr),
     }
 
-    print(f"\nLinear Regression Performance:")
+    print("\nLinear Regression Performance:")
     print(f"  MSE:  {lr_metrics['mse']:.4f}")
     print(f"  RMSE: {lr_metrics['rmse']:.4f}")
     print(f"  MAE:  {lr_metrics['mae']:.4f}")
@@ -120,7 +128,7 @@ def train_model(df):
         "r2": r2_score(y_test, y_pred_rf),
     }
 
-    print(f"\nRandom Forest Performance:")
+    print("\nRandom Forest Performance:")
     print(f"  MSE:  {rf_metrics['mse']:.4f}")
     print(f"  RMSE: {rf_metrics['rmse']:.4f}")
     print(f"  MAE:  {rf_metrics['mae']:.4f}")
@@ -140,7 +148,12 @@ def train_model(df):
     for metric in ["r2", "mse", "rmse", "mae"]:
         lr_val = results["linear_regression"][metric]
         rf_val = results["random_forest"][metric]
-        winner = "RF" if (metric == "r2" and rf_val > lr_val) or (metric != "r2" and rf_val < lr_val) else "LR"
+        winner = (
+            "RF"
+            if (metric == "r2" and rf_val > lr_val)
+            or (metric != "r2" and rf_val < lr_val)
+            else "LR"
+        )
         print(f"{metric.upper():<15} {lr_val:<15.4f} {rf_val:<15.4f} {winner}")
 
     best_model_name = (
@@ -157,7 +170,13 @@ def train_model(df):
     # Generate plots if matplotlib available
     if MATPLOTLIB_AVAILABLE:
         generate_plots(
-            X_test, y_test, y_predictions, feature_cols, models, results, best_model_name
+            X_test,
+            y_test,
+            y_predictions,
+            feature_cols,
+            models,
+            results,
+            best_model_name,
         )
 
     comparison_data = {
@@ -169,7 +188,9 @@ def train_model(df):
     return best_model, comparison_data
 
 
-def generate_plots(X_test, y_test, y_predictions, feature_cols, models, results, best_model_name):
+def generate_plots(
+    X_test, y_test, y_predictions, feature_cols, models, results, best_model_name
+):
     """Generate comparison plots."""
     os.makedirs(PLOTS_DIR, exist_ok=True)
 
@@ -184,7 +205,11 @@ def generate_plots(X_test, y_test, y_predictions, feature_cols, models, results,
         ax = axes[pos]
         lr_val = results["linear_regression"][metric]
         rf_val = results["random_forest"][metric]
-        bars = ax.bar(["Linear Reg", "Random Forest"], [lr_val, rf_val], color=["#3498db", "#e74c3c"])
+        bars = ax.bar(
+            ["Linear Reg", "Random Forest"],
+            [lr_val, rf_val],
+            color=["#3498db", "#e74c3c"],
+        )
         ax.set_ylabel(metric.upper())
         ax.set_title(f"{metric.upper()}")
         for bar in bars:
@@ -198,8 +223,12 @@ def generate_plots(X_test, y_test, y_predictions, feature_cols, models, results,
             )
 
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS_DIR, "01_metrics_comparison.png"), dpi=100, bbox_inches="tight")
-    print(f"\n[PLOT] Saved metrics_comparison.png")
+    plt.savefig(
+        os.path.join(PLOTS_DIR, "01_metrics_comparison.png"),
+        dpi=100,
+        bbox_inches="tight",
+    )
+    print("\n[PLOT] Saved metrics_comparison.png")
     plt.close()
 
     # 2. Predictions vs Actual
@@ -213,12 +242,18 @@ def generate_plots(X_test, y_test, y_predictions, feature_cols, models, results,
         ax.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], "r--", lw=2)
         ax.set_xlabel("Actual AQI")
         ax.set_ylabel("Predicted AQI")
-        ax.set_title(f"{model_name.replace('_', ' ').title()} (R2={results[model_name]['r2']:.3f})")
+        ax.set_title(
+            f"{model_name.replace('_', ' ').title()} (R2={results[model_name]['r2']:.3f})"
+        )
         ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS_DIR, "02_predictions_vs_actual.png"), dpi=100, bbox_inches="tight")
-    print(f"[PLOT] Saved predictions_vs_actual.png")
+    plt.savefig(
+        os.path.join(PLOTS_DIR, "02_predictions_vs_actual.png"),
+        dpi=100,
+        bbox_inches="tight",
+    )
+    print("[PLOT] Saved predictions_vs_actual.png")
     plt.close()
 
     # 3. Residuals Plot
@@ -236,8 +271,10 @@ def generate_plots(X_test, y_test, y_predictions, feature_cols, models, results,
         ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS_DIR, "03_residuals.png"), dpi=100, bbox_inches="tight")
-    print(f"[PLOT] Saved residuals.png")
+    plt.savefig(
+        os.path.join(PLOTS_DIR, "03_residuals.png"), dpi=100, bbox_inches="tight"
+    )
+    print("[PLOT] Saved residuals.png")
     plt.close()
 
     # 4. Feature Importance (Random Forest)
@@ -254,8 +291,12 @@ def generate_plots(X_test, y_test, y_predictions, feature_cols, models, results,
     ax.set_xticklabels([feature_cols[i] for i in indices], rotation=45, ha="right")
 
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS_DIR, "04_feature_importance.png"), dpi=100, bbox_inches="tight")
-    print(f"[PLOT] Saved feature_importance.png")
+    plt.savefig(
+        os.path.join(PLOTS_DIR, "04_feature_importance.png"),
+        dpi=100,
+        bbox_inches="tight",
+    )
+    print("[PLOT] Saved feature_importance.png")
     plt.close()
 
 
@@ -264,22 +305,22 @@ def main():
     model, comparison = train_model(df)
 
     os.makedirs(os.path.dirname(MODEL_OUT), exist_ok=True)
-    
+
     # Wrap model with versioning and preprocessing consistency
     best_model_name = comparison.get("best_model", "linear_regression")
     best_metrics = comparison[best_model_name]
-    
+
     wrapped_model = create_model_from_pipeline(
         pipeline=model,
         metrics=best_metrics,
         version="1.0.0",
     )
-    
+
     # Save wrapped model (includes metadata)
     wrapped_model.save(MODEL_OUT)
     print(f"\n[OK] Wrapped model saved to {MODEL_OUT}")
-    print(f"[OK] Model metadata includes: version, metrics, preprocessing info")
-    
+    print("[OK] Model metadata includes: version, metrics, preprocessing info")
+
     # Validate preprocessing
     checks = wrapped_model.validate_preprocessing()
     print(f"[OK] Preprocessing validation: {checks}")

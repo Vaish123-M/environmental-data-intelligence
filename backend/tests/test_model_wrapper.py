@@ -7,7 +7,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
@@ -28,10 +27,12 @@ def _make_pipeline():
     )
     target = np.array([60.0, 70.0, 40.0, 35.0])
 
-    pipeline = Pipeline([
-        ("scaler", StandardScaler()),
-        ("regressor", LinearRegression()),
-    ])
+    pipeline = Pipeline(
+        [
+            ("scaler", StandardScaler()),
+            ("regressor", LinearRegression()),
+        ]
+    )
     pipeline.fit(features, target)
     return pipeline
 

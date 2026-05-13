@@ -1,15 +1,16 @@
 {
-  "linear_regression": {
-    "mse": 76.17372791278387,
-    "rmse": 8.727756178582435,
-    "mae": 7.990342312235164,
-    "r2": -6.362003301748938
-  },
   "random_forest": {
-    "mse": 161.21055571500244,
-    "rmse": 12.696871887004392,
-    "mae": 11.495683333333396,
-    "r2": -14.580603391362294
+    "mse": 229.02800609806923,
+    "rmse": 15.133671269657908,
+    "mae": 14.171963528138505,
+    "r2": -21.134993038774336
   },
-  "best_model": "linear_regression"
+  "linear_regression": {},
+  "best_model": "random_forest",
+  "best_params": {
+    "regressor__n_estimators": 50,
+    "regressor__min_samples_split": 2,
+    "regressor__min_samples_leaf": 2,
+    "regressor__max_depth": 5
+  }
 }

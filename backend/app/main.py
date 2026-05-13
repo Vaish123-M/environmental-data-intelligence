@@ -2,17 +2,15 @@ from fastapi import FastAPI, HTTPException, File, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
-from io import BytesIO, StringIO
+from io import BytesIO
 import pandas as pd
-import joblib
 import os
-import csv
 import json
 import logging
 from datetime import datetime
 
-from .database import SessionLocal, EnvironmentalData, get_db
-from .schemas import EnvironmentalDataSchema, PredictRequest, PredictResponse
+from .database import EnvironmentalData, get_db
+from .schemas import PredictRequest, PredictResponse
 from .model import EnvironmentalModel
 
 logger = logging.getLogger(__name__)
@@ -29,7 +27,9 @@ app.add_middleware(
 )
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "model.joblib")
-SAMPLE_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "ml", "sample_data", "air_quality_real.csv")
+SAMPLE_DATA_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "..", "ml", "sample_data", "air_quality_real.csv"
+)
 PLOTS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "ml", "plots")
 
 # Mount plots directory for serving model comparison visualizations
@@ -38,6 +38,7 @@ if os.path.exists(PLOTS_PATH):
 
 # Global model variable and loader function
 model = None
+
 
 def get_model():
     """Lazy-load model on first access."""
@@ -68,31 +69,33 @@ def health():
 def get_model_comparison():
     """Get ML model comparison metrics (Linear Regression vs Random Forest) with plot URLs"""
     try:
-        comparison_file = os.path.join(os.path.dirname(__file__), "..", "models", "model_comparison.json")
+        comparison_file = os.path.join(
+            os.path.dirname(__file__), "..", "models", "model_comparison.json"
+        )
         plots = {
             "metrics_comparison": "/api/plots/01_metrics_comparison.png",
             "predictions_vs_actual": "/api/plots/02_predictions_vs_actual.png",
             "residuals": "/api/plots/03_residuals.png",
             "feature_importance": "/api/plots/04_feature_importance.png",
         }
-        
+
         if os.path.exists(comparison_file):
-            with open(comparison_file, 'r') as f:
+            with open(comparison_file, "r") as f:
                 comparison = json.load(f)
             return {
                 "models": comparison,
                 "best_model": comparison.get("best_model", "linear_regression"),
-                "plots": plots
+                "plots": plots,
             }
         else:
             return {
                 "models": {
                     "linear_regression": {"r2": 0, "mse": 0, "rmse": 0, "mae": 0},
-                    "random_forest": {"r2": 0, "mse": 0, "rmse": 0, "mae": 0}
+                    "random_forest": {"r2": 0, "mse": 0, "rmse": 0, "mae": 0},
                 },
                 "best_model": "linear_regression",
                 "plots": plots,
-                "warning": "Model comparison data not found; running training..."
+                "warning": "Model comparison data not found; running training...",
             }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -103,19 +106,19 @@ def get_model_metadata():
     """Get model versioning, preprocessing, and metadata information"""
     try:
         m = get_model()
-        
+
         if m is not None and isinstance(m, EnvironmentalModel):
             metadata = m.get_metadata()
             checks = m.validate_preprocessing()
             return {
                 "model_info": metadata,
                 "preprocessing_validation": checks,
-                "status": "ok"
+                "status": "ok",
             }
         else:
             return {
                 "status": "model_not_loaded",
-                "warning": "Could not load model for metadata"
+                "warning": "Could not load model for metadata",
             }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -125,8 +128,12 @@ def get_model_metadata():
 def get_evaluation_summary():
     """Return a compact evaluation summary for the dashboard."""
     try:
-        comparison_file = os.path.join(os.path.dirname(__file__), "..", "models", "model_comparison.json")
-        metadata_file = os.path.join(os.path.dirname(__file__), "..", "models", "model_metadata.json")
+        comparison_file = os.path.join(
+            os.path.dirname(__file__), "..", "models", "model_comparison.json"
+        )
+        metadata_file = os.path.join(
+            os.path.dirname(__file__), "..", "models", "model_metadata.json"
+        )
         model_info = {}
         if os.path.exists(metadata_file):
             with open(metadata_file, "r") as f:
@@ -170,12 +177,12 @@ def get_sample_data(db: Session = Depends(get_db)):
                 }
                 for d in db_data
             ]
-        
+
         # Fall back to sample CSV
         if os.path.exists(SAMPLE_DATA_PATH):
             df = pd.read_csv(SAMPLE_DATA_PATH)
             return df.to_dict(orient="records")
-        
+
         raise HTTPException(status_code=404, detail="No data available")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -193,15 +200,17 @@ def get_data_stats(db: Session = Depends(get_db)):
             else:
                 raise HTTPException(status_code=404, detail="No data available")
         else:
-            df = pd.DataFrame([
-                {
-                    "temperature": d.temperature,
-                    "humidity": d.humidity,
-                    "rainfall": d.rainfall,
-                    "aqi": d.aqi,
-                }
-                for d in data
-            ])
+            df = pd.DataFrame(
+                [
+                    {
+                        "temperature": d.temperature,
+                        "humidity": d.humidity,
+                        "rainfall": d.rainfall,
+                        "aqi": d.aqi,
+                    }
+                    for d in data
+                ]
+            )
 
         return {
             "avg_aqi": float(df["aqi"].mean()),
@@ -223,7 +232,7 @@ def get_regions(db: Session = Depends(get_db)):
     try:
         data = db.query(EnvironmentalData.region).distinct().all()
         regions = [d[0] for d in data]
-        
+
         if not regions:
             # Try sample data
             if os.path.exists(SAMPLE_DATA_PATH):
@@ -231,7 +240,7 @@ def get_regions(db: Session = Depends(get_db)):
                 regions = df["region"].unique().tolist()
             else:
                 regions = []
-        
+
         return {"regions": regions}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -242,7 +251,7 @@ def predict(req: PredictRequest):
     """Predict AQI based on environmental factors using wrapped model with versioning"""
     try:
         m = get_model()
-        
+
         # Use wrapped model for prediction (includes preprocessing)
         if m is not None and isinstance(m, EnvironmentalModel):
             result = m.predict(req.temperature, req.humidity, req.rainfall)
@@ -250,13 +259,13 @@ def predict(req: PredictRequest):
                 predicted_aqi=result["predicted_aqi"],
                 model_version=result.get("model_version", "1.0.0"),
             )
-        
+
         # Fallback heuristic if model unavailable
         logger.warning("Using fallback heuristic prediction")
         pred = 0.5 * req.temperature + 0.3 * req.humidity + 0.2 * (100 - req.rainfall)
         return PredictResponse(
             predicted_aqi=float(pred),
-            warning="Model not found; using heuristic estimate."
+            warning="Model not found; using heuristic estimate.",
         )
     except Exception as e:
         logger.error(f"Prediction failed: {str(e)}")
@@ -269,19 +278,19 @@ async def upload_data(file: UploadFile = File(...), db: Session = Depends(get_db
     try:
         if not file.filename.endswith(".csv"):
             raise HTTPException(status_code=400, detail="Only CSV files are supported")
-        
+
         # Read CSV
         contents = await file.read()
         df = pd.read_csv(BytesIO(contents))
-        
+
         # Validate columns
         required_cols = {"date", "region", "temperature", "humidity", "rainfall", "aqi"}
         if not required_cols.issubset(set(df.columns)):
             raise HTTPException(
                 status_code=400,
-                detail=f"Missing required columns: {required_cols - set(df.columns)}"
+                detail=f"Missing required columns: {required_cols - set(df.columns)}",
             )
-        
+
         # Insert into database
         inserted_count = 0
         for _, row in df.iterrows():
@@ -295,9 +304,9 @@ async def upload_data(file: UploadFile = File(...), db: Session = Depends(get_db
             )
             db.add(record)
             inserted_count += 1
-        
+
         db.commit()
-        
+
         return {
             "message": f"Successfully uploaded {inserted_count} records",
             "records_inserted": inserted_count,
@@ -314,11 +323,13 @@ async def upload_data(file: UploadFile = File(...), db: Session = Depends(get_db
 def get_data_by_region(region: str, db: Session = Depends(get_db)):
     """Get environmental data for a specific region"""
     try:
-        data = db.query(EnvironmentalData).filter(EnvironmentalData.region == region).all()
-        
+        data = (
+            db.query(EnvironmentalData).filter(EnvironmentalData.region == region).all()
+        )
+
         if not data:
             raise HTTPException(status_code=404, detail=f"No data for region: {region}")
-        
+
         return [
             {
                 "date": d.date,

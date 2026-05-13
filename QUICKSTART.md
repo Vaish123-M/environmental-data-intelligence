@@ -1,153 +1,58 @@
-# 🚀 Quick Start Guide — 5 Minutes to Running
+# 🚀 Quick Start Guide — Run locally in ~5 minutes
 
-## Prerequisites
-- Python 3.8+ (`python --version`)
-- Node.js 16+ (`node --version`)
+Prerequisites
+- Python 3.8+ and PowerShell (Windows) or a POSIX shell
+- Node.js 16+ (for the frontend)
 
----
+1) Backend — install and run
 
-## Step 1: Backend Setup (2 minutes)
-
-```bash
-# Open PowerShell in project root
-cd environmental-data-intelligence
-
-# Create & activate virtual environment
-python -m venv venv
-.\venv\Scripts\activate
-
-# Install dependencies
+```powershell
+# From project root
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r backend/requirements.txt
-
-# Train ML model
-python ml/train_model.py
-
-# Start backend
+pytest -q
+python ml/train_model.py    # optional: create models/model.joblib
 uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-✅ **Backend running:** `http://127.0.0.1:8000`  
-✅ **API Docs:** `http://127.0.0.1:8000/docs`
+Open: `http://127.0.0.1:8000` (API docs: `http://127.0.0.1:8000/docs`)
 
----
-
-## Step 2: Frontend Setup (3 minutes) — *In a new terminal*
+2) Frontend — optional (run in separate terminal)
 
 ```bash
-# Navigate to frontend
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start development server
 npm start
 ```
 
-✅ **Frontend opens automatically at:** `http://localhost:3000`
+Open: `http://localhost:3000`
 
----
+3) Quick API checks
 
-## What You'll See
+Use the OpenAPI docs or these curl examples:
 
-### Dashboard Page (`/`)
-- 4 statistic cards (AQI, Temperature, Humidity, Rainfall)
-- 4 interactive charts showing environmental trends
-- Raw data table with all records
+```bash
+curl http://127.0.0.1:8000/api/health
+curl http://127.0.0.1:8000/api/data
 
-### Analytics Page (`/analytics`)
-- Correlation analysis
-- Scatter plots for pattern analysis
-- Regional statistics
-- Dynamic region filtering
-
-### Predictions Page (`/predictions`)
-- Interactive sliders for weather factors
-- Real-time AQI prediction
-- Color-coded risk levels
-
-### Upload Page (`/upload`)
-- CSV file upload
-- Auto-validation
-- Database integration
-
----
-
-## Test the API
-
-Open `http://127.0.0.1:8000/docs` and try:
-- `GET /api/health` → Health check
-- `GET /api/data` → All environmental data
-- `GET /api/data/stats` → Statistics
-- `POST /api/predict` → Predict AQI
-
-**Try prediction with:**
-```json
-{
-  "temperature": 25,
-  "humidity": 60,
-  "rainfall": 5
-}
+curl -X POST http://127.0.0.1:8000/api/predict -H "Content-Type: application/json" -d '{"temperature":25,"humidity":60,"rainfall":5}'
 ```
 
----
+CSV upload format (example rows):
 
-## Sample CSV Upload Format
-
-Save as `.csv` and upload via `/upload` page:
 ```
 date,region,temperature,humidity,rainfall,aqi
 2024-01-01,North,22.1,55,0.0,85
-2024-01-02,Central,30.2,40,0.0,120
 ```
 
----
+Troubleshooting
+- If backend fails to start, ensure the venv is activated and dependencies installed.
+- If `models/model.joblib` is missing, run `python ml/train_model.py`.
 
-## Troubleshooting
+Next steps (recommended for internship polish)
+- Add `requirements-dev.txt` and dev tools (`black`, `ruff`, `mypy`).
+- Add GitHub Actions to run tests and linters on PRs.
+- Create `MODEL_CARD.md` and an evaluation notebook under `ml/`.
 
-**Backend won't start?**
-```bash
-# Ensure port 8000 is free
-# Verify Python: python --version
-# Reinstall: pip install -r backend/requirements.txt
-```
-
-**Frontend won't connect?**
-- Check backend is running
-- Browser console (F12) for errors
-- Check `http://127.0.0.1:8000/docs` loads
-
-**ML model not found?**
-```bash
-python ml/train_model.py
-```
-
----
-
-## Deployment
-
-### Frontend → Vercel
-```bash
-cd frontend
-npm run build
-# Connect to Vercel, deploy `build/` folder
-```
-
-### Backend → Render/Railway
-- Connect GitHub repo
-- Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-- Python 3.11+
-
----
-
-## Next: Customize!
-
-- Add real data (OpenAQ, NASA, NOAA)
-- Train better models (Random Forest, Neural Networks)
-- Add user authentication
-- Integrate weather APIs
-- Deploy to production
-
----
-
-**Documentation:** See [DEPLOYMENT.md](DEPLOYMENT.md) and [BUILD_SUMMARY.md](BUILD_SUMMARY.md)
+See also: [DEPLOYMENT.md](DEPLOYMENT.md), [BUILD_SUMMARY.md](BUILD_SUMMARY.md)

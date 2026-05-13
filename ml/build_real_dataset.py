@@ -17,19 +17,21 @@ import csv
 import gzip
 import io
 import json
-import math
 import os
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
-from collections import defaultdict
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Iterable
 
-OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "sample_data", "air_quality_real.csv")
+OUTPUT_PATH = os.path.join(
+    os.path.dirname(__file__), "sample_data", "air_quality_real.csv"
+)
 S3_BUCKET_URL = "https://openaq-data-archive.s3.amazonaws.com/"
-S3_LIST_URL = "https://openaq-data-archive.s3.amazonaws.com/?prefix=records/csv.gz/&max-keys=1000"
+S3_LIST_URL = (
+    "https://openaq-data-archive.s3.amazonaws.com/?prefix=records/csv.gz/&max-keys=1000"
+)
 MAX_FILES = 160
 
 
@@ -92,7 +94,9 @@ def pm25_to_aqi(pm25: float) -> float:
     value = max(0.0, min(pm25, 500.4))
     for c_low, c_high, a_low, a_high in breakpoints:
         if c_low <= value <= c_high:
-            return round(((a_high - a_low) / (c_high - c_low)) * (value - c_low) + a_low, 2)
+            return round(
+                ((a_high - a_low) / (c_high - c_low)) * (value - c_low) + a_low, 2
+            )
     return 500.0
 
 
@@ -118,8 +122,12 @@ def build_dataset(keys: Iterable[str]) -> list[dict[str, object]]:
         longitude = float(sample["lon"])
         date = sample["datetime"][:10]
 
-        pm25_values = [float(row["value"]) for row in file_rows if row["parameter"] == "pm25"]
-        pm10_values = [float(row["value"]) for row in file_rows if row["parameter"] == "pm10"]
+        pm25_values = [
+            float(row["value"]) for row in file_rows if row["parameter"] == "pm25"
+        ]
+        pm10_values = [
+            float(row["value"]) for row in file_rows if row["parameter"] == "pm10"
+        ]
         if pm25_values:
             pollution_value = sum(pm25_values) / len(pm25_values)
             source_parameter = "pm25"
@@ -185,7 +193,9 @@ def main() -> None:
             )
 
     print(f"Saved {len(rows)} real rows to {OUTPUT_PATH}")
-    print("Source: OpenAQ public S3 archive (pollution) + Open-Meteo archive API (weather)")
+    print(
+        "Source: OpenAQ public S3 archive (pollution) + Open-Meteo archive API (weather)"
+    )
     print("OpenAQ archive bucket: openaq-data-archive")
 
 

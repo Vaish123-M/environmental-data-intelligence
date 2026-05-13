@@ -8,7 +8,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
@@ -16,7 +15,6 @@ if ROOT_DIR not in sys.path:
 
 import app.main as main_module
 from app.model import EnvironmentalModel
-
 
 client = TestClient(main_module.app)
 
@@ -33,12 +31,18 @@ def _build_test_wrapper(version="9.9.9"):
     )
     target = np.array([60.0, 70.0, 40.0, 35.0])
 
-    pipeline = Pipeline([
-        ("scaler", StandardScaler()),
-        ("regressor", LinearRegression()),
-    ])
+    pipeline = Pipeline(
+        [
+            ("scaler", StandardScaler()),
+            ("regressor", LinearRegression()),
+        ]
+    )
     pipeline.fit(features, target)
-    return EnvironmentalModel(model=pipeline, version=version, metrics={"r2": 0.91, "mse": 1.2, "rmse": 1.1, "mae": 0.8})
+    return EnvironmentalModel(
+        model=pipeline,
+        version=version,
+        metrics={"r2": 0.91, "mse": 1.2, "rmse": 1.1, "mae": 0.8},
+    )
 
 
 def test_health_endpoint():
