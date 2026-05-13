@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
@@ -13,22 +13,7 @@ function Predictions({ darkMode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Auto-predict on input change
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      handlePredict();
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [formData]);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: parseFloat(e.target.value),
-    });
-  };
-
-  const handlePredict = async () => {
+  const handlePredict = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -39,6 +24,21 @@ function Predictions({ darkMode }) {
     } finally {
       setLoading(false);
     }
+  }, [formData]);
+
+  // Auto-predict on input change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handlePredict();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [formData, handlePredict]);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: parseFloat(e.target.value),
+    });
   };
 
   const getAQILevel = (aqi) => {
