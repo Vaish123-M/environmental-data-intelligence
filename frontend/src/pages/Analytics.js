@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+
 function Analytics({ data, loading }) {
   const [selectedRegion, setSelectedRegion] = useState('All');
   const [modelComparison, setModelComparison] = useState(null);
@@ -10,7 +12,7 @@ function Analytics({ data, loading }) {
   useEffect(() => {
     const fetchModelComparison = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/models/comparison');
+        const response = await fetch(`${API_BASE}/api/models/comparison`);
         const result = await response.json();
         setModelComparison(result);
       } catch (error) {
@@ -177,7 +179,7 @@ function Analytics({ data, loading }) {
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <h4 className="font-semibold mb-3 text-gray-700">Metrics Comparison</h4>
                   <img 
-                    src={modelComparison.plots.metrics_comparison} 
+                    src={`${API_BASE}${modelComparison.plots.metrics_comparison}`} 
                     alt="Metrics Comparison" 
                     className="w-full rounded border border-gray-300"
                   />
@@ -187,7 +189,7 @@ function Analytics({ data, loading }) {
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <h4 className="font-semibold mb-3 text-gray-700">Predictions vs Actual</h4>
                   <img 
-                    src={modelComparison.plots.predictions_vs_actual} 
+                    src={`${API_BASE}${modelComparison.plots.predictions_vs_actual}`} 
                     alt="Predictions vs Actual" 
                     className="w-full rounded border border-gray-300"
                   />
@@ -197,7 +199,7 @@ function Analytics({ data, loading }) {
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <h4 className="font-semibold mb-3 text-gray-700">Residuals Analysis</h4>
                   <img 
-                    src={modelComparison.plots.residuals} 
+                    src={`${API_BASE}${modelComparison.plots.residuals}`} 
                     alt="Residuals" 
                     className="w-full rounded border border-gray-300"
                   />
@@ -207,7 +209,7 @@ function Analytics({ data, loading }) {
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <h4 className="font-semibold mb-3 text-gray-700">Feature Importance</h4>
                   <img 
-                    src={modelComparison.plots.feature_importance} 
+                    src={`${API_BASE}${modelComparison.plots.feature_importance}`} 
                     alt="Feature Importance" 
                     className="w-full rounded border border-gray-300"
                   />

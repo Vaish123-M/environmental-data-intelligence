@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-const API_BASE = 'http://127.0.0.1:8000';
+// Use environment variable or default to localhost
+const API_BASE = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
 
 function Evaluation() {
   const [summary, setSummary] = useState(null);
