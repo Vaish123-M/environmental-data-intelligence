@@ -1,0 +1,15 @@
+# Render service definition (configure repo in Render dashboard if needed)
+# Replace <YOUR_REPO> with your GitHub repo if you want Render to auto-detect
+services:
+  - type: web
+    name: environmental-data-intelligence-api
+    env: python
+    branch: deploy-minimal
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        # Value should be set securely in Render dashboard (Postgres recommended)
+        value: ""
+        scope: env
