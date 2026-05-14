@@ -56,3 +56,29 @@ License
 
 Educational use.
 
+---
+
+For interviewers: quick walkthrough
+
+- What this project demonstrates: a complete ML application lifecycle — preprocessing and training scripts (`ml/`), a serialised model artifact (`backend/models/model.joblib`), a REST API for inference (`backend/app/main.py`), and a React dashboard for visualization (`frontend/src/pages/`).
+- How to validate: run backend tests (`pytest -q`) and use `POST /api/predict` to verify predictions. Example curl:
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/api/predict -H "Content-Type: application/json" -d '{"temperature":25,"humidity":65,"rainfall":10}' | jq
+```
+
+- Model details: feature inputs are `temperature`, `humidity`, `rainfall` plus derived features (see `ml/preprocess.py`); model artifact path: `backend/models/model.joblib`; model evaluation metrics are produced by `ml/evaluate_model.py` and saved plots under `ml/plots/`.
+
+- Reproducible steps for results:
+	1. Prepare Python env and install dependencies: `pip install -r backend/requirements.txt`.
+	2. (Optional) Retrain: `python ml/train_model.py` will produce `backend/models/model.joblib`.
+	3. Run evaluation: `python ml/evaluate_model.py` to print MAE/RMSE/R2 and write plots.
+
+- What to look for in code during an interview:
+	- `backend/app/model.py`: model wrapper, save/load, predict API contract.
+	- `backend/app/main.py`: API endpoints and router structure.
+	- `ml/train_model.py`: feature engineering and training pipeline.
+	- `frontend/src/pages/`: how UI obtains and displays model outputs.
+
+If you'd like, I can also add a short `DEMO.md` with sample requests and example responses (JSON) for quick copy-paste during interviews.
+
