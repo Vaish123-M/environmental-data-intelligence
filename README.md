@@ -1,67 +1,134 @@
-# Environmental Data Intelligence — Full-Stack Research Platform
+# Environmental Data Intelligence
 
-This repository is a compact, internship-ready scaffold for an Environmental Data Intelligence project. It includes a FastAPI backend, a simple scikit-learn ML pipeline, sample datasets, and a demo frontend. The goal is reproducible experiments, clear APIs, and a presentable demo you can show in interviews.
+Air quality prediction and environmental analytics platform built with FastAPI, React, and scikit-learn. The project provides real-time AQI prediction, data analysis, and model evaluation through a simple web interface.
 
-Key highlights
-- FastAPI backend serving model inference and dataset endpoints.
-- Example ML pipeline (`ml/train_model.py`) and saved model artifact (`models/model.joblib`).
-- Demo frontend + static dashboard for quick visualization.
+Repository
+- GitHub: https://github.com/Vaish123-M/environmental-data-intelligence
 
-Getting started (developer quick commands)
+## Project Summary
 
-1) Create and activate a Python virtual environment, install backend dependencies, and run tests:
+This project predicts AQI from environmental inputs such as temperature, humidity, and rainfall. It also includes a dashboard for exploring trends, comparing model performance, and reviewing generated plots.
+
+## Key Features
+
+- Real-time AQI prediction from environmental inputs.
+- Analytics dashboard with scatter plots and regional statistics.
+- Model comparison view with evaluation metrics and visual outputs.
+- CSV upload support for adding environmental data.
+- REST APIs for health, data, prediction, upload, and evaluation.
+
+## Tech Stack
+
+Frontend: React, Axios, Recharts, Tailwind CSS
+
+Backend: FastAPI, Uvicorn, SQLAlchemy, SQLite
+
+Machine Learning: scikit-learn, joblib, pandas, numpy
+
+## Architecture
+
+```text
+User Browser
+    -> React Frontend
+    -> FastAPI Backend
+    -> ML Model / Data Layer
+    -> Prediction + Analytics Response
+```
+
+Backend responsibilities:
+- Serve REST APIs for prediction, data, uploads, and evaluation.
+- Load the trained model artifact from `backend/models/model.joblib`.
+- Expose plot images and model comparison metadata.
+
+Frontend responsibilities:
+- Render dashboard, analytics, upload, and prediction screens.
+- Call backend APIs through `REACT_APP_API_URL`.
+- Display model outputs and charts in a clean UI.
+
+## Project Structure
+
+```text
+environmental-data-intelligence/
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── database.py
+│   │   ├── model.py
+│   │   └── schemas.py
+│   ├── models/
+│   └── tests/
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   └── components/
+│   └── public/
+├── ml/
+│   ├── train_model.py
+│   ├── train_with_plots.py
+│   ├── evaluate_model.py
+│   └── plots/
+├── QUICKSTART.md
+├── DEPLOYMENT.md
+└── README.md
+```
+
+## Local Setup
+
+### Backend
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r backend/requirements.txt
-pip install -r backend/requirements.txt --upgrade
 pytest -q
+uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-2) Train (optional) and run the backend locally:
+API docs:
+- `http://127.0.0.1:8000/docs`
+- `http://127.0.0.1:8000/redoc`
+
+### Frontend
 
 ```powershell
-python ml/train_model.py
-uvicorn backend.app.main:app --reload --port 8000
-```
-
-3) Open the demo UI:
-
-- Open `frontend/static_dashboard.html` in your browser, or run the React frontend in `frontend/`:
-
-```bash
 cd frontend
 npm install
 npm start
 ```
 
-Tests & quality
-- Run tests: `pytest -q` (tests are under `backend/tests/`).
-- Add coverage: `pytest --cov=backend --cov-report=term-missing`.
-- Lint/format: add `black`, `ruff`, and `mypy` to `requirements-dev.txt` and run in CI.
+Open:
+- `http://localhost:3000`
 
-Packaging & CI
-- Add `pyproject.toml` or `setup.cfg` for packaging and pin dependencies.
-- Add a GitHub Actions workflow to run tests, lint, and build on PRs.
+## Useful API Endpoints
 
-Model & metadata
-- Model artifact: `models/model.joblib` and `models/model_metadata.json` describe input features and version.
-- Add a `MODEL_CARD.md` describing model intended use, limitations, and evaluation metrics.
+- `GET /api/health` - Backend health check.
+- `GET /api/data` - Environmental dataset.
+- `GET /api/data/stats` - Summary statistics.
+- `POST /api/predict` - AQI prediction endpoint.
+- `POST /api/upload` - CSV upload endpoint.
+- `GET /api/models/comparison` - Model metrics and plot links.
+- `GET /api/evaluation/summary` - Evaluation summary for the dashboard.
 
-Development notes
-- Database: SQLite is used for local prototyping; swap to PostgreSQL in production.
-- Warnings in tests: address SQLAlchemy and timezone-aware datetime deprecations.
+## Deployment Notes
 
-Contributing
-- Add a `CONTRIBUTING.md` with dev setup, testing, and commit guidelines.
+- Frontend expects `REACT_APP_API_URL` to point to the deployed backend.
+- Backend can run on Render, Railway, or any platform that supports Python web services.
+- See `DEPLOYMENT.md` for deployment steps.
 
-Contact
-- Use repository issues for questions or reach out with the contact info in the project header.
+## Project Highlights
 
-This README is intentionally concise — see `QUICKSTART.md` for copy-paste commands and `DEPLOYMENT.md` for production deployment notes.
+- Practical ML pipeline for AQI prediction and analysis.
+- Clear frontend-backend separation with API-driven communication.
+- Visual model evaluation that makes results easy to review.
+- Ready for local development and cloud deployment.
 
-Docker
-- Backend Dockerfile: `backend/Dockerfile`
-- Start locally with: `docker-compose up --build`
+## Notes for Reviewers
+
+- Use `QUICKSTART.md` for setup steps.
+- Use `DEPLOYMENT.md` for deployment configuration.
+- Model artifacts and plots are stored under `backend/models/` and `ml/plots/`.
+
+## License
+
+Educational use.
 
