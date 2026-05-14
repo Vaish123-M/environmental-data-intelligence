@@ -1,0 +1,5 @@
+temperature,humidity,rainfall,temp_humidity_interaction,temp_rainfall_interaction,aqi
+27.9,80.0,7.2,2232.0,200.88,144.8
+28.6,79.0,0.0,2259.4,0.0,145.0
+28.6,78.0,0.0,2230.8,0.0,137.2
+27.7,78.0,0.0,2160.6,0.0,143.9

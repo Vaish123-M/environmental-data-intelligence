@@ -1,17 +1,18 @@
 # Environmental Data Intelligence Platform
 
-Concise local-development project that predicts Air Quality Index (AQI) from environmental inputs and provides an interactive analytics dashboard and REST APIs for inference, evaluation, and visualization.
+Concise local-development prototype that predicts Air Quality Index (AQI) from environmental inputs and provides an interactive analytics dashboard and REST APIs for inference, evaluation, and visualization.
 
 Purpose
 
 - Provide a practical ML engineering pipeline that covers data preprocessing, model training, evaluation (MAE, RMSE, R²), inference APIs, and a React dashboard for visualization.
+- Clearly scope the project as a prototype built on a small in-repo dataset, with train/validation/test separation and cross-validation.
 - Demonstrates end-to-end experience in Machine Learning, Environmental Analytics, and full-stack engineering.
 
 Key Features
 
 - AQI Prediction API: lightweight inference endpoint (`POST /api/predict`) that returns predicted AQI and model metadata.
 - Interactive React Dashboard: visualizations, model comparison, and CSV upload for batch predictions.
-- Model Evaluation: scripts and plots for MAE, RMSE, and R² with saved artifacts under `ml/plots/`.
+- Model Evaluation: scripts and plots for MAE, RMSE, and R², plus cross-validation and ablation results with saved artifacts under `ml/plots/`.
 - Reproducible ML Pipeline: preprocessing, training, and model serialization using scikit-learn and joblib.
 - Dev-ready: tests (`pytest`), formatting (`black`, `ruff`), and simple local workflows.
 
@@ -25,8 +26,8 @@ Tech Stack (high-value keywords)
 High-level Overview
 
 1. Data preprocessing: `ml/preprocess.py` implements feature engineering (temperature, humidity, rainfall + derived features).
-2. Training: `ml/train_model.py` builds a scikit-learn pipeline and saves `backend/models/model.joblib`.
-3. Evaluation: `ml/evaluate_model.py` computes MAE, RMSE, R² and writes plots to `ml/plots/`.
+2. Training: `ml/train_model.py` builds a scikit-learn pipeline, separates train/validation/test data, runs cross-validation, and saves `backend/models/model.joblib`.
+3. Evaluation: `ml/evaluate_model.py` computes MAE, RMSE, R² on the held-out test split and writes plots to `ml/plots/`.
 4. Inference: `backend/app/main.py` exposes `POST /api/predict`, `GET /api/models/comparison`, and evaluation endpoints.
 5. Visualization: `frontend/src/pages/` implements dashboard views and calls the backend at `http://127.0.0.1:8000`.
 
@@ -34,8 +35,8 @@ Machine Learning Workflow (concise)
 
 - Data ingestion: CSV uploads via API or static sample datasets in `ml/sample_data/`.
 - Preprocessing: feature construction, scaling, and validation functions in `ml/preprocess.py` and `backend/app/model.py`.
-- Model training: pipeline creation (scaler + regressor), hyperparameter tuning (if applied), and serialization to `backend/models/`.
-- Evaluation: compute MAE, RMSE, and R²; generate residual and comparison plots saved under `ml/plots/`.
+- Model training: pipeline creation (scaler + regressor), cross-validation on the training split, validation-based model selection, and serialization to `backend/models/`.
+- Evaluation: compute MAE, RMSE, and R²; generate residual, comparison, and ablation outputs saved under `ml/plots/`.
 - Runtime: model artifact loaded by FastAPI at startup for low-latency inference.
 
 Project Architecture (folder highlights)
@@ -89,6 +90,7 @@ Local execution
 - The backend loads a serialized scikit-learn model for low-latency inference.
 - Frontend calls the local backend at `http://127.0.0.1:8000`.
 - The repo is intentionally kept simple for local development, portfolio review, and internship showcase.
+- The dataset is small by design, so the project should be read as a rigorous prototype rather than a production AQI predictor.
 
 Future improvements
 
