@@ -1,23 +1,59 @@
-# Environmental Data Intelligence
+# Environmental Data Intelligence Platform
 
-Objective
+Concise, deployment-ready project that predicts Air Quality Index (AQI) from environmental inputs and provides an interactive analytics dashboard and REST APIs for inference, evaluation, and visualization.
 
-Provide a lightweight, developer-friendly platform that predicts Air Quality Index (AQI) from common environmental inputs, and exposes a small analytics dashboard and REST APIs for exploration and integration.
+Purpose
 
-Brief
+- Provide a practical ML engineering pipeline that covers data preprocessing, model training, evaluation (MAE, RMSE, R²), inference APIs, and a React dashboard for visualization.
+- Demonstrates end-to-end experience in Machine Learning, Environmental Analytics, and deployment-ready engineering.
 
-This repository contains a FastAPI backend that loads a trained scikit-learn model to predict AQI from inputs (temperature, humidity, rainfall and derived features), plus a React frontend that visualizes predictions, model comparisons, and evaluation plots. It is intended for local development, experimentation, and demonstration.
+Key Features
 
-Tech stack
+- AQI Prediction API: lightweight inference endpoint (`POST /api/predict`) that returns predicted AQI and model metadata.
+- Interactive React Dashboard: visualizations, model comparison, and CSV upload for batch predictions.
+- Model Evaluation: scripts and plots for MAE, RMSE, and R² with saved artifacts under `ml/plots/`.
+- Reproducible ML Pipeline: preprocessing, training, and model serialization using scikit-learn and joblib.
+- Dev-ready: tests (`pytest`), formatting (`black`, `ruff`), and CI-friendly configuration.
 
-- Backend: FastAPI, Uvicorn, SQLAlchemy, SQLite
+Tech Stack (high-value keywords)
+
+- Machine Learning: scikit-learn, pandas, numpy, joblib
+- Backend & APIs: FastAPI, Uvicorn, SQLAlchemy, SQLite
 - Frontend: React, Axios, Recharts, Tailwind CSS
-- ML: scikit-learn, joblib, pandas, numpy
-- Dev & CI: pytest, black, ruff
+- Dev/CI: pytest, black, ruff, GitHub Actions
 
-Quick start (local)
+High-level Overview
 
-1) Backend
+1. Data preprocessing: `ml/preprocess.py` implements feature engineering (temperature, humidity, rainfall + derived features).
+2. Training: `ml/train_model.py` builds a scikit-learn pipeline and saves `backend/models/model.joblib`.
+3. Evaluation: `ml/evaluate_model.py` computes MAE, RMSE, R² and writes plots to `ml/plots/`.
+4. Inference: `backend/app/main.py` exposes `POST /api/predict`, `GET /api/models/comparison`, and evaluation endpoints.
+5. Visualization: `frontend/src/pages/` implements dashboard views and calls the backend via `REACT_APP_API_URL`.
+
+Machine Learning Workflow (concise)
+
+- Data ingestion: CSV uploads via API or static sample datasets in `ml/sample_data/`.
+- Preprocessing: feature construction, scaling, and validation functions in `ml/preprocess.py` and `backend/app/model.py`.
+- Model training: pipeline creation (scaler + regressor), hyperparameter tuning (if applied), and serialization to `backend/models/`.
+- Evaluation: compute MAE, RMSE, and R²; generate residual and comparison plots saved under `ml/plots/`.
+- Deployment: model artifact loaded by FastAPI at startup for low-latency inference.
+
+Project Architecture (folder highlights)
+
+```
+environmental-data-intelligence/
+├─ backend/
+│  ├─ app/            # FastAPI app, model wrapper, database
+│  ├─ models/         # serialized model artifacts
+│  └─ tests/          # pytest test-suite
+├─ frontend/          # React dashboard and UI
+├─ ml/                # preprocessing, training, evaluation, plots
+└─ README.md, QUICKSTART.md, DEPLOYMENT.md
+```
+
+Quickstart (developer)
+
+1) Backend (Windows / PowerShell)
 
 ```powershell
 python -m venv .venv
@@ -34,51 +70,48 @@ npm install
 npm start
 ```
 
-Main endpoints
+API Reference (selected)
 
-- `GET /api/health` — health check
-- `POST /api/predict` — returns predicted AQI and model metadata
-- `POST /api/upload` — upload CSV data for analysis
-- `GET /api/models/comparison` — model metrics and plots
+- `GET /api/health` — service health and version
+- `POST /api/predict` — JSON body: `{temperature, humidity, rainfall}` → returns `{predicted_aqi, model_version, metrics}`
+- `POST /api/upload` — upload CSV for batch predictions
+- `GET /api/models/comparison` — returns model metrics and plot URLs
+- `GET /api/evaluation/summary` — evaluation metrics and plot references
 
-Testing & formatting
+Model & Evaluation
 
-- Run backend tests: `pytest -q`
-- Format: `black .` and `ruff format .`
+- Model artifact: `backend/models/model.joblib` (scikit-learn pipeline).
+- Evaluation metrics recorded: MAE, RMSE, R² (see `ml/evaluate_model.py`).
+- Visualization: residual plots and comparison charts saved to `ml/plots/`.
 
-Notes
+Deployment-readiness
 
-- Frontend reads backend URL from `REACT_APP_API_URL`.
-- Model artifact: `backend/models/model.joblib`.
-- See `QUICKSTART.md` and `DEPLOYMENT.md` for more details.
+- The backend loads a serialized scikit-learn model for low-latency inference and exposes a minimal set of endpoints suitable for containerization.
+- Frontend expects `REACT_APP_API_URL` to reach the backend; set this in your environment or hosting platform (e.g., Vercel environment variables).
+- CI hooks: formatters and tests are included to maintain code quality before merging.
+
+Future improvements
+
+- Add scalable model serving (FastAPI + Gunicorn/Uvicorn workers or cast to a model server).
+- Add reproducible training experiments (MLflow or equivalent) and automated model versioning.
+- Introduce lightweight async job queue for large/batch processing.
+- Add more robust dataset validation and monitoring (data drift alerts).
+
+Reviewer walkthrough (what to inspect quickly)
+
+- `backend/app/model.py`: model wrapper, save/load, and predict contract (good to evaluate engineering quality).
+- `ml/train_model.py`: feature engineering, pipeline construction, and training code (shows ML workflow).
+- `ml/evaluate_model.py` and `ml/plots/`: how evaluation metrics and visualizations are generated.
+- `frontend/src/pages/`: dashboard implementation and how it consumes the API.
+
+Keywords
+
+Machine Learning · Environmental Analytics · AQI Prediction · Data Preprocessing · Model Evaluation · FastAPI · React Dashboard · Scikit-learn · REST APIs · Data Visualization · AI-powered Analytics · Scalable Architecture · Prediction Pipeline
 
 License
 
 Educational use.
 
----
+Contact
 
-For interviewers: quick walkthrough
-
-- What this project demonstrates: a complete ML application lifecycle — preprocessing and training scripts (`ml/`), a serialised model artifact (`backend/models/model.joblib`), a REST API for inference (`backend/app/main.py`), and a React dashboard for visualization (`frontend/src/pages/`).
-- How to validate: run backend tests (`pytest -q`) and use `POST /api/predict` to verify predictions. Example curl:
-
-```bash
-curl -s -X POST http://127.0.0.1:8000/api/predict -H "Content-Type: application/json" -d '{"temperature":25,"humidity":65,"rainfall":10}' | jq
-```
-
-- Model details: feature inputs are `temperature`, `humidity`, `rainfall` plus derived features (see `ml/preprocess.py`); model artifact path: `backend/models/model.joblib`; model evaluation metrics are produced by `ml/evaluate_model.py` and saved plots under `ml/plots/`.
-
-- Reproducible steps for results:
-	1. Prepare Python env and install dependencies: `pip install -r backend/requirements.txt`.
-	2. (Optional) Retrain: `python ml/train_model.py` will produce `backend/models/model.joblib`.
-	3. Run evaluation: `python ml/evaluate_model.py` to print MAE/RMSE/R2 and write plots.
-
-- What to look for in code during an interview:
-	- `backend/app/model.py`: model wrapper, save/load, predict API contract.
-	- `backend/app/main.py`: API endpoints and router structure.
-	- `ml/train_model.py`: feature engineering and training pipeline.
-	- `frontend/src/pages/`: how UI obtains and displays model outputs.
-
-If you'd like, I can also add a short `DEMO.md` with sample requests and example responses (JSON) for quick copy-paste during interviews.
-
+Project owner: see repo owner on GitHub for contact details.
