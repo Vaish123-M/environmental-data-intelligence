@@ -50,9 +50,4 @@ Troubleshooting
 - If backend fails to start, ensure the venv is activated and dependencies installed.
 - If `models/model.joblib` is missing, run `python ml/train_model.py`.
 
-Next steps (recommended for internship polish)
-- Add `requirements-dev.txt` and dev tools (`black`, `ruff`, `mypy`).
-- Add GitHub Actions to run tests and linters on PRs.
-- Create `MODEL_CARD.md` and an evaluation notebook under `ml/`.
-
-See also: [DEPLOYMENT.md](DEPLOYMENT.md), [BUILD_SUMMARY.md](BUILD_SUMMARY.md)
+See also: [README.md](README.md), [MODEL_CARD.md](MODEL_CARD.md), [DEMO.md](DEMO.md)

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API_BASE = 'http://127.0.0.1:8000';
 
 function Upload({ onUpload }) {
   const [file, setFile] = useState(null);
@@ -37,20 +37,6 @@ function Upload({ onUpload }) {
     }
   };
 
-  const handleClearData = async () => {
-    if (!window.confirm('Are you sure you want to delete all uploaded data? This cannot be undone.')) return;
-    try {
-      setUploading(true);
-      await axios.delete(`${API_BASE}/api/data`);
-      setMessage({ type: 'success', text: 'All uploaded data deleted.' });
-      setTimeout(() => onUpload(), 500);
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Failed to delete data: ' + (err.response?.data?.detail || err.message) });
-    } finally {
-      setUploading(false);
-    }
-  };
-
   return (
     <div>
       <h1 className="text-4xl font-bold mb-8 text-gray-800">Upload Environmental Data</h1>
@@ -81,14 +67,6 @@ function Upload({ onUpload }) {
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition disabled:opacity-50"
           >
             {uploading ? 'Uploading...' : 'Upload & Process'}
-          </button>
-
-          <button
-            onClick={handleClearData}
-            disabled={uploading}
-            className="w-full mt-3 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition disabled:opacity-50"
-          >
-            {uploading ? 'Working...' : 'Delete All Uploaded Data'}
           </button>
 
           {message && (

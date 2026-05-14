@@ -34,5 +34,5 @@ curl -s http://127.0.0.1:8000/api/health | jq
 ```
 
 Notes
-- Replace `127.0.0.1:8000` with your `REACT_APP_API_URL` or deployed backend URL.
+- Replace `127.0.0.1:8000` with the backend address you're running locally.
 - The example response values are illustrative. Run `python ml/evaluate_model.py` to compute actual MAE/RMSE/R² for the current model.

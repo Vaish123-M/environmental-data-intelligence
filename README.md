@@ -1,11 +1,11 @@
 # Environmental Data Intelligence Platform
 
-Concise, deployment-ready project that predicts Air Quality Index (AQI) from environmental inputs and provides an interactive analytics dashboard and REST APIs for inference, evaluation, and visualization.
+Concise local-development project that predicts Air Quality Index (AQI) from environmental inputs and provides an interactive analytics dashboard and REST APIs for inference, evaluation, and visualization.
 
 Purpose
 
 - Provide a practical ML engineering pipeline that covers data preprocessing, model training, evaluation (MAE, RMSE, R²), inference APIs, and a React dashboard for visualization.
-- Demonstrates end-to-end experience in Machine Learning, Environmental Analytics, and deployment-ready engineering.
+- Demonstrates end-to-end experience in Machine Learning, Environmental Analytics, and full-stack engineering.
 
 Key Features
 
@@ -13,14 +13,14 @@ Key Features
 - Interactive React Dashboard: visualizations, model comparison, and CSV upload for batch predictions.
 - Model Evaluation: scripts and plots for MAE, RMSE, and R² with saved artifacts under `ml/plots/`.
 - Reproducible ML Pipeline: preprocessing, training, and model serialization using scikit-learn and joblib.
-- Dev-ready: tests (`pytest`), formatting (`black`, `ruff`), and CI-friendly configuration.
+- Dev-ready: tests (`pytest`), formatting (`black`, `ruff`), and simple local workflows.
 
 Tech Stack (high-value keywords)
 
 - Machine Learning: scikit-learn, pandas, numpy, joblib
 - Backend & APIs: FastAPI, Uvicorn, SQLAlchemy, SQLite
 - Frontend: React, Axios, Recharts, Tailwind CSS
-- Dev/CI: pytest, black, ruff, GitHub Actions
+- Dev: pytest, black, ruff
 
 High-level Overview
 
@@ -28,7 +28,7 @@ High-level Overview
 2. Training: `ml/train_model.py` builds a scikit-learn pipeline and saves `backend/models/model.joblib`.
 3. Evaluation: `ml/evaluate_model.py` computes MAE, RMSE, R² and writes plots to `ml/plots/`.
 4. Inference: `backend/app/main.py` exposes `POST /api/predict`, `GET /api/models/comparison`, and evaluation endpoints.
-5. Visualization: `frontend/src/pages/` implements dashboard views and calls the backend via `REACT_APP_API_URL`.
+5. Visualization: `frontend/src/pages/` implements dashboard views and calls the backend at `http://127.0.0.1:8000`.
 
 Machine Learning Workflow (concise)
 
@@ -36,7 +36,7 @@ Machine Learning Workflow (concise)
 - Preprocessing: feature construction, scaling, and validation functions in `ml/preprocess.py` and `backend/app/model.py`.
 - Model training: pipeline creation (scaler + regressor), hyperparameter tuning (if applied), and serialization to `backend/models/`.
 - Evaluation: compute MAE, RMSE, and R²; generate residual and comparison plots saved under `ml/plots/`.
-- Deployment: model artifact loaded by FastAPI at startup for low-latency inference.
+- Runtime: model artifact loaded by FastAPI at startup for low-latency inference.
 
 Project Architecture (folder highlights)
 
@@ -48,7 +48,7 @@ environmental-data-intelligence/
 │  └─ tests/          # pytest test-suite
 ├─ frontend/          # React dashboard and UI
 ├─ ml/                # preprocessing, training, evaluation, plots
-└─ README.md, QUICKSTART.md, DEPLOYMENT.md
+└─ README.md, QUICKSTART.md, MODEL_CARD.md, DEMO.md
 ```
 
 Quickstart (developer)
@@ -84,11 +84,11 @@ Model & Evaluation
 - Evaluation metrics recorded: MAE, RMSE, R² (see `ml/evaluate_model.py`).
 - Visualization: residual plots and comparison charts saved to `ml/plots/`.
 
-Deployment-readiness
+Local execution
 
-- The backend loads a serialized scikit-learn model for low-latency inference and exposes a minimal set of endpoints suitable for containerization.
-- Frontend expects `REACT_APP_API_URL` to reach the backend; set this in your environment or hosting platform (e.g., Vercel environment variables).
-- CI hooks: formatters and tests are included to maintain code quality before merging.
+- The backend loads a serialized scikit-learn model for low-latency inference.
+- Frontend calls the local backend at `http://127.0.0.1:8000`.
+- The repo is intentionally kept simple for local development, portfolio review, and internship showcase.
 
 Future improvements
 
@@ -118,6 +118,6 @@ Project owner: see repo owner on GitHub for contact details.
 
 Additional artifacts
 
-- `DEMO.md` — copy-paste API examples for quick verification and interview demos.
+- `DEMO.md` — copy-paste API examples for quick verification.
 - `MODEL_CARD.md` — model description, inputs/outputs, evaluation notes and limitations.
 - `experiments/example_run.json` — example experiment logging format (suggested simple reproducibility pattern).

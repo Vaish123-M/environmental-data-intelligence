@@ -166,7 +166,6 @@ environmental-data-intelligence/
 │   ├── preprocess.py          # Shared preprocessing
 │   └── sample_data/           # Sample datasets
 ├── frontend/                   # React frontend
-├── .github/workflows/ci.yml    # GitHub Actions CI
 ├── MODEL_CARD.md              # Model documentation
 ├── QUICKSTART.md              # Quick setup guide
 └── README.md                  # Project overview
@@ -181,7 +180,7 @@ environmental-data-intelligence/
 4. **Data**: Integrate more datasets (NASA, NOAA, ESA)
 5. **Documentation**: Improve docstrings, add tutorials, create demo notebooks
 6. **Testing**: Add more edge-case and integration tests
-7. **DevOps**: Improve Docker setup, add Kubernetes manifests
+7. **Platform**: Improve local developer experience, docs, and tests
 
 ### Contribution Ideas
 - **🐛 Bug fixes**: Found a bug? Open an issue or PR.

@@ -1,6 +1,10 @@
 import os
 import sys
 
+ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 import numpy as np
 import pandas as pd
 from fastapi.testclient import TestClient
@@ -8,13 +12,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
-if ROOT_DIR not in sys.path:
-    sys.path.insert(0, ROOT_DIR)
-
-
-import app.main as main_module
-from app.model import EnvironmentalModel
+import app.main as main_module  # noqa: E402
+from app.model import EnvironmentalModel  # noqa: E402
 
 client = TestClient(main_module.app)
 

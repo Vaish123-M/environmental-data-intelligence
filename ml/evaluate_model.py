@@ -13,6 +13,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
+# Use shared preprocessing utilities
+from .preprocess import load_and_preprocess
+
 ROOT = os.path.dirname(os.path.dirname(__file__))
 MODEL_PATH = os.path.join(ROOT, "backend", "models", "model.joblib")
 DATA_PATH = os.path.join(
@@ -28,9 +31,6 @@ FEATURE_COLS = [
     "temp_humidity_interaction",
     "temp_rainfall_interaction",
 ]
-
-# Use shared preprocessing utilities
-from .preprocess import load_and_preprocess
 
 
 def evaluate():
