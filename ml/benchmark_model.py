@@ -82,7 +82,7 @@ def benchmark_inference_latency(model, X, n_samples=1000):
                 "per_sample_ms": float(elapsed_ms / batch_size),
             }
 
-    print(f"\nBatch Predictions (1 run each):")
+    print("\nBatch Predictions (1 run each):")
     for batch_key, batch_info in batch_times.items():
         print(
             f"  {batch_key:15} | Total: {batch_info['total_ms']:8.2f} ms | Per-sample: {batch_info['per_sample_ms']:.4f} ms"
