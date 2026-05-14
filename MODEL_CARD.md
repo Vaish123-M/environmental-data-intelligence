@@ -1,3 +1,42 @@
+# Model Card — Environmental Data Intelligence
+
+Model name: Environmental AQI Predictor
+Type: scikit-learn pipeline (preprocessing + regressor)
+Artifact: `backend/models/model.joblib`
+
+Summary
+
+This model predicts Air Quality Index (AQI) from environmental inputs (temperature, humidity, rainfall) and derived interaction features. It is packaged as a scikit-learn pipeline and intended for demonstration and prototyping purposes.
+
+Intended use
+
+- Use case: lightweight AQI estimates for dashboards, analysis, and teaching/prototyping ML workflows.
+- Not intended for regulatory decisions or safety-critical systems.
+
+Model details
+
+- Preprocessing: standard scaling and derived interaction features (see `ml/preprocess.py`).
+- Algorithm: scikit-learn pipeline (e.g., `StandardScaler` + `LinearRegression` or other regressor depending on `ml/train_model.py`).
+- Input features: `temperature`, `humidity`, `rainfall`, `temp_humidity_interaction`, `temp_rainfall_interaction`.
+- Output: scalar AQI prediction and optional metadata (model version, metrics).
+
+Evaluation
+
+- Metrics: mean absolute error (MAE), root mean squared error (RMSE), and coefficient of determination (R²). Run `python ml/evaluate_model.py` to reproduce metrics and generate plots saved under `ml/plots/`.
+
+Limitations
+
+- Trained on sample datasets included in `ml/sample_data/`; real-world performance depends on data quality and representativeness.
+- No uncertainty quantification in this artifact; consider ensembles or probabilistic models for that.
+
+How to reproduce
+
+1. (Optional) Retrain: `python ml/train_model.py` — this creates a new `backend/models/model.joblib`.
+2. Evaluate: `python ml/evaluate_model.py` — prints MAE/RMSE/R² and writes plots to `ml/plots/`.
+
+Versioning
+
+- Model artifact version is embedded in the serialized wrapper (see `backend/app/model.py`). Track changes by committing updated artifacts with clear commit messages.
 # Model Card — Environmental Data Intelligence (AQI Prediction)
 
 ## Overview

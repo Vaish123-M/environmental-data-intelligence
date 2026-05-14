@@ -1,0 +1,14 @@
+{
+  "run_id": "example-001",
+  "timestamp": "2026-05-14T00:00:00Z",
+  "train_args": {
+    "model": "LinearRegression",
+    "scaler": "StandardScaler",
+    "random_seed": 42
+  },
+  "metrics": {
+    "mae": 3.5,
+    "rmse": 5.0,
+    "r2": 0.78
+  }
+}

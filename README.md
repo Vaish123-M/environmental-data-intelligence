@@ -115,3 +115,9 @@ Educational use.
 Contact
 
 Project owner: see repo owner on GitHub for contact details.
+
+Additional artifacts
+
+- `DEMO.md` — copy-paste API examples for quick verification and interview demos.
+- `MODEL_CARD.md` — model description, inputs/outputs, evaluation notes and limitations.
+- `experiments/example_run.json` — example experiment logging format (suggested simple reproducibility pattern).
