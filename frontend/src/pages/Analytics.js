@@ -1,18 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const API_BASE = 'http://127.0.0.1:8000';
+import { apiUrl } from '../api';
 
 function Analytics({ data, loading }) {
   const [selectedRegion, setSelectedRegion] = useState('All');
   const [modelComparison, setModelComparison] = useState(null);
   const [modelLoading, setModelLoading] = useState(true);
 
+  const formatNumber = (value, digits = 2) => {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? numericValue.toFixed(digits) : 'N/A';
+  };
+
+  const getModelMetrics = (modelKey) => {
+    const model = modelComparison?.models?.[modelKey] || modelComparison?.[modelKey] || {};
+    const validation = model.validation || {};
+    const cv = model.cv || {};
+
+    return {
+      r2: model.r2 ?? validation.r2 ?? cv.r2_mean,
+      mse: model.mse ?? validation.mse,
+      rmse: model.rmse ?? validation.rmse ?? cv.rmse_mean,
+      mae: model.mae ?? validation.mae ?? cv.mae_mean,
+    };
+  };
+
   // Fetch model comparison data
   useEffect(() => {
     const fetchModelComparison = async () => {
       try {
-        const response = await fetch(`${API_BASE}/api/models/comparison`);
+        const response = await fetch(apiUrl('/api/models/comparison'));
         const result = await response.json();
         setModelComparison(result);
       } catch (error) {
@@ -32,18 +49,19 @@ function Analytics({ data, loading }) {
   const filteredData = selectedRegion === 'All' ? data : data.filter(d => d.region === selectedRegion);
 
   // Calculate correlations
+  const divisor = filteredData.length || 1;
   const correlations = {
-    tempAqi: (filteredData.reduce((sum, d) => sum + d.temperature * d.aqi, 0) / filteredData.length).toFixed(2),
-    humidityAqi: (filteredData.reduce((sum, d) => sum + d.humidity * d.aqi, 0) / filteredData.length).toFixed(2),
-    rainfallAqi: (filteredData.reduce((sum, d) => sum + d.rainfall * d.aqi, 0) / filteredData.length).toFixed(2),
+    tempAqi: formatNumber(filteredData.reduce((sum, d) => sum + d.temperature * d.aqi, 0) / divisor),
+    humidityAqi: formatNumber(filteredData.reduce((sum, d) => sum + d.humidity * d.aqi, 0) / divisor),
+    rainfallAqi: formatNumber(filteredData.reduce((sum, d) => sum + d.rainfall * d.aqi, 0) / divisor),
   };
 
   const regionStats = regions.slice(1).map(region => {
     const regionData = data.filter(d => d.region === region);
     return {
       region,
-      avgAQI: (regionData.reduce((sum, d) => sum + d.aqi, 0) / regionData.length).toFixed(1),
-      avgTemp: (regionData.reduce((sum, d) => sum + d.temperature, 0) / regionData.length).toFixed(1),
+      avgAQI: formatNumber(regionData.reduce((sum, d) => sum + d.aqi, 0) / (regionData.length || 1), 1),
+      avgTemp: formatNumber(regionData.reduce((sum, d) => sum + d.temperature, 0) / (regionData.length || 1), 1),
     };
   });
 
@@ -121,19 +139,19 @@ function Analytics({ data, loading }) {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-600">R² Score:</span>
-                  <span className="font-semibold">{modelComparison.models.linear_regression.r2.toFixed(4)}</span>
+                  <span className="font-semibold">{formatNumber(getModelMetrics('linear_regression').r2, 4)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">MSE:</span>
-                  <span className="font-semibold">{modelComparison.models.linear_regression.mse.toFixed(4)}</span>
+                  <span className="font-semibold">{formatNumber(getModelMetrics('linear_regression').mse, 4)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">RMSE:</span>
-                  <span className="font-semibold">{modelComparison.models.linear_regression.rmse.toFixed(4)}</span>
+                  <span className="font-semibold">{formatNumber(getModelMetrics('linear_regression').rmse, 4)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">MAE:</span>
-                  <span className="font-semibold">{modelComparison.models.linear_regression.mae.toFixed(4)}</span>
+                  <span className="font-semibold">{formatNumber(getModelMetrics('linear_regression').mae, 4)}</span>
                 </div>
               </div>
             </div>
@@ -144,19 +162,19 @@ function Analytics({ data, loading }) {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-600">R² Score:</span>
-                  <span className="font-semibold">{modelComparison.models.random_forest.r2.toFixed(4)}</span>
+                  <span className="font-semibold">{formatNumber(getModelMetrics('random_forest').r2, 4)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">MSE:</span>
-                  <span className="font-semibold">{modelComparison.models.random_forest.mse.toFixed(4)}</span>
+                  <span className="font-semibold">{formatNumber(getModelMetrics('random_forest').mse, 4)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">RMSE:</span>
-                  <span className="font-semibold">{modelComparison.models.random_forest.rmse.toFixed(4)}</span>
+                  <span className="font-semibold">{formatNumber(getModelMetrics('random_forest').rmse, 4)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">MAE:</span>
-                  <span className="font-semibold">{modelComparison.models.random_forest.mae.toFixed(4)}</span>
+                  <span className="font-semibold">{formatNumber(getModelMetrics('random_forest').mae, 4)}</span>
                 </div>
               </div>
             </div>
@@ -165,7 +183,7 @@ function Analytics({ data, loading }) {
           {/* Best Model Badge */}
           <div className="mt-4 p-3 bg-amber-50 border-l-4 border-amber-500 rounded">
             <p className="text-amber-900">
-              <strong>✓ Best Model in Use:</strong> {modelComparison.best_model.replace('_', ' ').toUpperCase()}
+              <strong>✓ Best Model in Use:</strong> {(modelComparison.best_model || 'N/A').replace('_', ' ').toUpperCase()}
               <span className="ml-2 text-sm text-amber-700">(Higher R² = Better Predictions)</span>
             </p>
           </div>
@@ -179,7 +197,7 @@ function Analytics({ data, loading }) {
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <h4 className="font-semibold mb-3 text-gray-700">Metrics Comparison</h4>
                   <img 
-                    src={`${API_BASE}${modelComparison.plots.metrics_comparison}`} 
+                    src={apiUrl(modelComparison.plots.metrics_comparison)} 
                     alt="Metrics Comparison" 
                     className="w-full rounded border border-gray-300"
                   />
@@ -189,7 +207,7 @@ function Analytics({ data, loading }) {
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <h4 className="font-semibold mb-3 text-gray-700">Predictions vs Actual</h4>
                   <img 
-                    src={`${API_BASE}${modelComparison.plots.predictions_vs_actual}`} 
+                    src={apiUrl(modelComparison.plots.predictions_vs_actual)} 
                     alt="Predictions vs Actual" 
                     className="w-full rounded border border-gray-300"
                   />
@@ -199,7 +217,7 @@ function Analytics({ data, loading }) {
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <h4 className="font-semibold mb-3 text-gray-700">Residuals Analysis</h4>
                   <img 
-                    src={`${API_BASE}${modelComparison.plots.residuals}`} 
+                    src={apiUrl(modelComparison.plots.residuals)} 
                     alt="Residuals" 
                     className="w-full rounded border border-gray-300"
                   />
@@ -209,7 +227,7 @@ function Analytics({ data, loading }) {
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <h4 className="font-semibold mb-3 text-gray-700">Feature Importance</h4>
                   <img 
-                    src={`${API_BASE}${modelComparison.plots.feature_importance}`} 
+                    src={apiUrl(modelComparison.plots.feature_importance)} 
                     alt="Feature Importance" 
                     className="w-full rounded border border-gray-300"
                   />

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-
-const API_BASE = 'http://127.0.0.1:8000';
+import { apiUrl } from '../api';
 
 function Predictions({ darkMode }) {
   const [formData, setFormData] = useState({
@@ -17,7 +16,7 @@ function Predictions({ darkMode }) {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.post(`${API_BASE}/api/predict`, formData);
+        const response = await axios.post(apiUrl('/api/predict'), formData);
       setPrediction(response.data);
     } catch (err) {
       setError('Failed to get prediction. ' + (err.response?.data?.detail || err.message));

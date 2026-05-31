@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
-// Use environment variable or default to localhost
-const API_BASE = 'http://127.0.0.1:8000';
+import { apiUrl } from '../api';
 
 function Evaluation() {
   const [summary, setSummary] = useState(null);
@@ -11,7 +9,7 @@ function Evaluation() {
   useEffect(() => {
     const loadSummary = async () => {
       try {
-        const response = await fetch(`${API_BASE}/api/evaluation/summary`);
+        const response = await fetch(apiUrl('/api/evaluation/summary'));
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
@@ -114,7 +112,7 @@ function Evaluation() {
         ].map(([title, src]) => (
           <div key={title} className="bg-white p-4 rounded-lg shadow">
             <h3 className="font-semibold mb-3 text-gray-800">{title}</h3>
-            <img src={`${API_BASE}${src}`} alt={title} className="w-full rounded border border-gray-200" />
+            <img src={apiUrl(src)} alt={title} className="w-full rounded border border-gray-200" />
           </div>
         ))}
       </div>

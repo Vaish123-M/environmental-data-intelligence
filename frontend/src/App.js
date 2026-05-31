@@ -7,8 +7,7 @@ import Analytics from './pages/Analytics';
 import Evaluation from './pages/Evaluation';
 import Predictions from './pages/Predictions';
 import Upload from './pages/Upload';
-
-const API_BASE = 'http://127.0.0.1:8000';
+import { apiUrl } from './api';
 
 function App() {
   const [data, setData] = useState([]);
@@ -23,7 +22,7 @@ function App() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE}/api/data`);
+      const response = await axios.get(apiUrl('/api/data'));
       setData(response.data);
       setError(null);
     } catch (err) {

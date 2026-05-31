@@ -10,12 +10,12 @@
   <body class="bg-gray-100 p-6">
     <div class="max-w-4xl mx-auto bg-white rounded shadow p-6">
       <h1 class="text-2xl font-semibold mb-4">Environmental Dashboard (Demo)</h1>
-      <p id="statusText" class="text-sm text-gray-600 mb-4">Connecting to backend at http://127.0.0.1:8000...</p>
+      <p id="statusText" class="text-sm text-gray-600 mb-4">Connecting to backend...</p>
       <canvas id="aqiChart" height="120"></canvas>
     </div>
 
     <script>
-      const BACKEND_URL = 'http://127.0.0.1:8000';
+      const BACKEND_URL = window.location.protocol === 'file:' ? 'http://127.0.0.1:8000' : '';
 
       async function fetchData(){
         const res = await fetch(`${BACKEND_URL}/api/data`);

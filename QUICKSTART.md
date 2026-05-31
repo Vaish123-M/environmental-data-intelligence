@@ -39,6 +39,13 @@ curl http://127.0.0.1:8000/api/data
 curl -X POST http://127.0.0.1:8000/api/predict -H "Content-Type: application/json" -d '{"temperature":25,"humidity":60,"rainfall":5}'
 ```
 
+Deployment notes
+
+- Frontend API calls are relative by default, so the simplest deployment is to build the React app and serve it behind the same domain as the FastAPI backend.
+- If you host the frontend and backend separately, set `REACT_APP_API_BASE_URL` at build time, for example `https://api.example.com`.
+- The React dev server also proxies `/api` to `http://127.0.0.1:8000` via `frontend/package.json`, which keeps local development simple.
+- A practical low-friction option is one backend host plus a reverse proxy such as Nginx or Caddy in front of both services.
+
 CSV upload format (example rows):
 
 ```
